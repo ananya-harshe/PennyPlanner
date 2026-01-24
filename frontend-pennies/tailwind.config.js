@@ -9,9 +9,13 @@ export default {
     extend: {
       colors: {
         emerald: {
-          500: '#58CC02',
-          600: '#4CAA00',
-          700: '#3D8A00',
+          500: 'var(--emerald)', // Custom Emerald
+          600: 'var(--tropical-teal)', // Darker
+          700: 'var(--baltic-blue)', // Darkest
+          100: 'var(--tea-green)', // Lightest
+          200: 'var(--light-green)', // Light
+          300: 'var(--light-green)',
+          400: 'var(--emerald)',
         },
         sky: {
           500: '#1CB0F6',
