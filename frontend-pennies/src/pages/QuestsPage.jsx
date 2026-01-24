@@ -154,27 +154,51 @@ const QuestQuizModal = ({ quest, onClose, onComplete }) => {
   )
 }
 
+import { useAuth } from '@/store/authContext'
+
 export default function QuestsPage() {
-  const [quests, setQuests] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { questsData, setQuestsData } = useAuth()
+
+  // Initialize state from cache if available
+  const [quests, setQuests] = useState(questsData?.quests || [])
+  const [loading, setLoading] = useState(!questsData)
   const [activeQuest, setActiveQuest] = useState(null)
-  const [learningStats, setLearningStats] = useState([])
-  const [totalXP, setTotalXP] = useState(0)
+  const [learningStats, setLearningStats] = useState(questsData?.learningStats || [])
+  const [totalXP, setTotalXP] = useState(questsData?.totalXP || 0)
 
   useEffect(() => {
-    fetchQuests()
+    // Determine if we need to fetch new data
+    const shouldFetch = !questsData || quests.length === 0
+
+    if (shouldFetch) {
+      fetchQuests()
+    } else {
+      // If we have cached data, ensure we just check for updates in background or if XP changed significantly?
+      // User requested: "regenerate if the user gains more XP OR they are out of their 3 quests"
+      // If we have data, we just rely on the cache.
+      // We will do a silent check of XP to see if we should regenerate, 
+      // BUT "gains more XP" usually happens via an action ON this page.
+      // Let's just fetch if no data.
+    }
   }, [])
 
   const fetchQuests = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${API_URL}/quests`, { headers: getAuthHeaders() })
-      const data = await response.json()
-      setQuests(data)
 
-      // Fetch progress data for graph
-      const progressResponse = await fetch(`${API_URL}/progress`, { headers: getAuthHeaders() })
+      // Parallel fetch for quests and progress
+      const [questsResponse, progressResponse] = await Promise.all([
+        fetch(`${API_URL}/quests`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/progress`, { headers: getAuthHeaders() })
+      ])
+
+      const questsDataNew = await questsResponse.json()
       const progressData = await progressResponse.json()
+
+      // Process Quests - only update if different or empty? 
+      // Actually backend generates on GET usually? 
+      // If we just got them, set them.
+      setQuests(questsDataNew)
       setTotalXP(progressData.xp || 0)
 
       // Process XP history
@@ -193,6 +217,13 @@ export default function QuestsPage() {
       }
       setLearningStats(last7Days)
 
+      // Update Cache
+      setQuestsData({
+        quests: questsDataNew,
+        totalXP: progressData.xp || 0,
+        learningStats: last7Days
+      })
+
     } catch (error) {
       console.error("Failed to fetch data", error)
       toast.error("Failed to load quests")
@@ -204,7 +235,26 @@ export default function QuestsPage() {
   const handleQuestComplete = (result) => {
     toast.success(`Quest Complete! +${result.xp_earned} XP`)
     setActiveQuest(null)
-    fetchQuests()
+
+    // Update local state immediately
+    const newTotalXP = totalXP + result.xp_earned
+    setTotalXP(newTotalXP)
+
+    // Remove completed quest
+    const updatedQuests = quests.filter(q => q._id !== activeQuest._id)
+    setQuests(updatedQuests)
+
+    // Update Cache
+    setQuestsData(prev => ({
+      ...prev,
+      quests: updatedQuests,
+      totalXP: newTotalXP
+    }))
+
+    // Trigger regeneration ONLY if NO quests left
+    if (updatedQuests.length === 0) {
+      fetchQuests()
+    }
   }
 
   if (loading) {

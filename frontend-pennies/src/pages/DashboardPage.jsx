@@ -6,16 +6,27 @@ import axios from 'axios'
 import { theme } from '@/theme'
 import { PennyMascot, Progress } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
+import { useAuth } from '@/store/authContext'
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
 
 export default function DashboardPage() {
+  const { dashboardData, setDashboardData } = useAuth()
   const [data, setData] = useState(null)
   const [pennyMessage, setPennyMessage] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
+      // If we already have data in context, use it!
+      if (dashboardData) {
+        console.log("⚡ Using cached dashboard data")
+        setData(dashboardData.analysis)
+        setPennyMessage(dashboardData.message)
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
 
@@ -31,6 +42,12 @@ export default function DashboardPage() {
         setData(analysisData)
         setPennyMessage(messageData.message)
 
+        // Cache the data in context
+        setDashboardData({
+          analysis: analysisData,
+          message: messageData.message
+        })
+
       } catch (e) {
         console.error("Failed to fetch dashboard data", e)
         toast.error("Failed to load dashboard")
@@ -40,7 +57,10 @@ export default function DashboardPage() {
     }
 
     fetchData()
-  }, [])
+  }, []) // Keep empty dependency array to run only on mount/unmount logic, accessing context current value via closure if needed? 
+  // Actually, if I don't include dashboardData in deps, and it WAS populated but component remounted, it works.
+  // If it wasn't populated, we fetch and populate.
+  // The only risk is if dashboardData changes externally while component is mounted, but that shouldn't happen except on logout.
 
   if (loading) {
     return (

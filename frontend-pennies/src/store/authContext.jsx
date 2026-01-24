@@ -7,16 +7,19 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const [dashboardData, setDashboardData] = useState(null)
+  const [questsData, setQuestsData] = useState(null)
+
   // Initialize from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
-    
+
     if (storedToken && storedUser) {
       setToken(storedToken)
       setUser(JSON.parse(storedUser))
     }
-    
+
     setLoading(false)
   }, [])
 
@@ -31,6 +34,8 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     setToken(null)
     setUser(null)
+    setDashboardData(null)
+    setQuestsData(null)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
   }, [])
@@ -38,7 +43,7 @@ export function AuthProvider({ children }) {
   const isAuthenticated = !!token
 
   return (
-    <AuthContext.Provider value={{ token, user, loading, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ token, user, loading, login, logout, isAuthenticated, dashboardData, setDashboardData, questsData, setQuestsData }}>
       {children}
     </AuthContext.Provider>
   )
