@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { toast } from 'sonner'
 import { PennyMascot } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
+import QuestCompletionAnimation from '@/components/QuestCompletionAnimation'
 
 // Multi-step Quiz Modal for Quest
 const QuestQuizModal = ({ quest, onClose, onComplete }) => {
@@ -165,6 +166,8 @@ export default function QuestsPage() {
   const [activeQuest, setActiveQuest] = useState(null)
   const [learningStats, setLearningStats] = useState(questsData?.learningStats || [])
   const [totalXP, setTotalXP] = useState(questsData?.totalXP || 0)
+  const [showAnimation, setShowAnimation] = useState(false)
+  const [gainedXP, setGainedXP] = useState(0)
 
   useEffect(() => {
     // Determine if we need to fetch new data
@@ -172,13 +175,6 @@ export default function QuestsPage() {
 
     if (shouldFetch) {
       fetchQuests()
-    } else {
-      // If we have cached data, ensure we just check for updates in background or if XP changed significantly?
-      // User requested: "regenerate if the user gains more XP OR they are out of their 3 quests"
-      // If we have data, we just rely on the cache.
-      // We will do a silent check of XP to see if we should regenerate, 
-      // BUT "gains more XP" usually happens via an action ON this page.
-      // Let's just fetch if no data.
     }
   }, [])
 
@@ -233,8 +229,10 @@ export default function QuestsPage() {
   }
 
   const handleQuestComplete = (result) => {
-    toast.success(`Quest Complete! +${result.xp_earned} XP`)
+    // toast.success(`Quest Complete! +${result.xp_earned} XP`)
     setActiveQuest(null)
+    setGainedXP(result.xp_earned)
+    setShowAnimation(true)
 
     // Update local state immediately
     const newTotalXP = totalXP + result.xp_earned
@@ -252,12 +250,23 @@ export default function QuestsPage() {
     }))
 
     // Trigger regeneration ONLY if NO quests left
+    // MOVED: Now handled in handleAnimationComplete so we don't show loading spinner over the animation
+    /*
     if (updatedQuests.length === 0) {
       fetchQuests()
     }
+    */
 
     // Sync XP with global user state (Sidebar)
     refreshUser();
+  }
+
+  const handleAnimationComplete = () => {
+    setShowAnimation(false)
+    // If we have no quests left (meaning we just completed the last one), generate more now
+    if (quests.length === 0) {
+      fetchQuests();
+    }
   }
 
   if (loading) {
@@ -399,6 +408,14 @@ export default function QuestsPage() {
           ))
         )}
       </div>
+
+      {/* Animation Overlay */}
+      {showAnimation && (
+        <QuestCompletionAnimation
+          xpGained={gainedXP}
+          onComplete={handleAnimationComplete}
+        />
+      )}
     </div>
   )
 }
