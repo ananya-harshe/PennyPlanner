@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, PieChart as PieChartIcon, CreditCard, Wallet, Loader2, AlertCircle } from 'lucide-react'
+import { TrendingUp, TrendingDown, PieChart as PieChartIcon, CreditCard, Wallet, Loader2, AlertCircle, Target, Plus, PiggyBank } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts'
 import { toast } from 'sonner'
 import axios from 'axios'
@@ -7,12 +7,14 @@ import { theme } from '@/theme'
 import { PennyMascot, Progress } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
 import { useAuth } from '@/store/authContext'
+import AddGoalModal from '@/components/AddGoalModal'
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
 
 export default function DashboardPage() {
-  const { dashboardData, setDashboardData } = useAuth()
+  const { dashboardData, setDashboardData, goalsData, setGoalsData } = useAuth()
   const [data, setData] = useState(null)
+  const [showAddGoal, setShowAddGoal] = useState(false)
   const [pennyMessage, setPennyMessage] = useState(null)
   const [pennyAdvice, setPennyAdvice] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -33,26 +35,34 @@ export default function DashboardPage() {
         setLoading(true)
 
         // Parallel Fetching for Speed Optimization
-        const [analysisResponse, messageResponse, adviceResponse] = await Promise.all([
+        const [analysisResponse, messageResponse, adviceResponse, goalsResponse, goalInsightsResponse] = await Promise.all([
           fetch(`${API_URL}/transactions/analysis`, { headers: getAuthHeaders() }),
           fetch(`${API_URL}/penny/message?context=home`, { headers: getAuthHeaders() }),
-          fetch(`${API_URL}/penny/insights`, { headers: getAuthHeaders() })
+          fetch(`${API_URL}/penny/insights`, { headers: getAuthHeaders() }),
+          fetch(`${API_URL}/goals`, { headers: getAuthHeaders() }),
+          fetch(`${API_URL}/goals/insights`, { headers: getAuthHeaders() })
         ]);
 
         const analysisData = await analysisResponse.json()
         const messageData = await messageResponse.json()
         const adviceData = await adviceResponse.json()
+        const goalsList = await goalsResponse.json()
+        const goalInsights = await goalInsightsResponse.json()
 
         setData(analysisData)
         setPennyMessage(messageData.message)
-        setPennyAdvice(adviceData.insight)
+        // Combine penny advice with goal advice if available
+        const goalMsg = goalInsights.insights?.[0]?.message;
+        setPennyAdvice(goalMsg || adviceData.insight)
 
         // Cache the data in context
         setDashboardData({
           analysis: analysisData,
           message: messageData.message,
-          advice: adviceData.insight
+          advice: goalMsg || adviceData.insight
         })
+
+        setGoalsData(goalsList.data)
 
       } catch (e) {
         console.error("Failed to fetch dashboard data", e)
@@ -60,6 +70,7 @@ export default function DashboardPage() {
       } finally {
         setLoading(false)
       }
+
     }
 
     fetchData()
@@ -87,6 +98,58 @@ export default function DashboardPage() {
       />
 
 
+      {/* Goals Section */}
+      <div className="card-3d p-6 border-4 border-indigo-200 mb-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100 rounded-full blur-[50px] -z-10" />
+
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
+            <Target className="text-indigo-500" />
+            Your Financial Goals
+          </h2>
+          <button
+            onClick={() => setShowAddGoal(true)}
+            className="px-4 py-2 bg-indigo-50 text-indigo-600 font-bold rounded-xl border-2 border-indigo-100 hover:bg-indigo-100 transition-colors flex items-center gap-1.5 text-sm"
+          >
+            <Plus size={16} />
+            New Goal
+          </button>
+        </div>
+
+        {goalsData && goalsData.length > 0 ? (
+          <div className="space-y-4">
+            {goalsData.map(goal => (
+              <div key={goal._id} className="bg-white p-4 rounded-2xl border-2 border-gray-100 shadow-sm">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600">
+                      <PiggyBank size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-800">{goal.title}</h3>
+                      <p className="text-xs text-gray-500 font-bold">${goal.current_amount || 0} / ${goal.target_amount}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-indigo-500">{Math.round((goal.current_amount / goal.target_amount) * 100)}%</span>
+                </div>
+                <Progress value={(goal.current_amount / goal.target_amount) * 100} className="h-3" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 bg-white/50 rounded-2xl border-2 border-dashed border-gray-300">
+            <p className="text-gray-500 font-medium mb-3">No goals set yet! Start saving today.</p>
+            <button
+              onClick={() => setShowAddGoal(true)}
+              className="text-indigo-500 font-bold hover:underline"
+            >
+              Create your first goal
+            </button>
+          </div>
+        )}
+      </div>
+
+      {showAddGoal && <AddGoalModal onClose={() => setShowAddGoal(false)} />}
 
       <div className="card-3d p-6 border-4 border-gray-200 mb-6">
         <h2 className="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
@@ -102,20 +165,32 @@ export default function DashboardPage() {
                   data={data.chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
+                  innerRadius={50}
                   outerRadius={80}
                   paddingAngle={5}
                   dataKey="value"
+                  labelLine={false}
                 >
                   {data.chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <RechartsTooltip
-                  formatter={(value) => `$${value.toFixed(2)}`}
+                  formatter={(value, name, props) => {
+                    const total = data.chartData.reduce((a, b) => a + b.value, 0);
+                    const percent = ((value / total) * 100).toFixed(1);
+                    return [`$${value.toFixed(2)} (${percent}%)`, name];
+                  }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                 />
-                <Legend />
+                <Legend
+                  formatter={(value, entry, index) => {
+                    const total = data.chartData.reduce((a, b) => a + b.value, 0);
+                    const val = data.chartData[index]?.value || 0;
+                    const percent = ((val / total) * 100).toFixed(0);
+                    return <span className="text-sm font-bold ml-1">{percent}% {value}</span>
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           ) : (

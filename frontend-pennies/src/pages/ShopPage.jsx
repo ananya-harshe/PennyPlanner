@@ -3,10 +3,14 @@ import { ShoppingBag, Star, Lock, Check, Zap, Gift, TrendingUp, CreditCard } fro
 import { toast } from 'sonner'
 import { API_URL, getAuthHeaders } from '@/api/client'
 import { PennyMascot } from '@/components/PennyComponents'
+import { useAuth } from '@/store/authContext'
+import ShopRedemptionAnimation from '@/components/ShopRedemptionAnimation'
 
 export default function ShopPage() {
+    const { refreshUser } = useAuth()
     const [userXP, setUserXP] = useState(0)
     const [loading, setLoading] = useState(true)
+    const [purchasedItem, setPurchasedItem] = useState(null)
 
     // Financial Rewards
     const shopItems = [
@@ -36,14 +40,34 @@ export default function ShopPage() {
         }
     }
 
-    const handleBuy = (item) => {
+    const handleBuy = async (item) => {
         if (item.unlocked) return
 
         if (userXP >= item.price) {
-            // Optimistic update
-            setUserXP(prev => prev - item.price)
-            toast.success(`Redeemed ${item.name}! Check your email for details.`)
-            // TODO: Call backend to process purchase/redemption
+            // Call backend to process purchase/redemption
+            try {
+                const response = await fetch(`${API_URL}/progress/redeem`, {
+                    method: 'POST',
+                    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: item.price })
+                })
+                const result = await response.json()
+
+                if (result.success) {
+                    setUserXP(result.xp)
+                    // toast.success(`Redeemed ${item.name}! Check your email for details.`)
+                    // Trigger animation
+                    setPurchasedItem(item)
+
+                    // Sync global user state so sidebar updates
+                    refreshUser();
+                } else {
+                    toast.error(result.message || "Redemption failed")
+                }
+            } catch (error) {
+                console.error("Redemption error", error)
+                toast.error("Failed to redeem reward")
+            }
         } else {
             toast.error(`Need ${item.price - userXP} more XP! Keep completing quests!`)
         }
@@ -59,6 +83,12 @@ export default function ShopPage() {
 
     return (
         <div className="p-4 lg:p-8 lg:px-10 space-y-6 pb-24 lg:pb-8 min-h-screen bg-transparent">
+            {purchasedItem && (
+                <ShopRedemptionAnimation
+                    item={purchasedItem}
+                    onComplete={() => setPurchasedItem(null)}
+                />
+            )}
 
             {/* Header & Balance */}
             <div className="flex items-center justify-between mb-6 px-2">

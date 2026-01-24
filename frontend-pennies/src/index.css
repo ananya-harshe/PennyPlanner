@@ -14,6 +14,30 @@
   font-style: normal;
 }
 
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
 * {
   @apply antialiased text-center;
   font-family: "Macondo", cursive;
@@ -92,8 +116,18 @@ header {
 }
 
 /* Typography */
+<<<<<<< HEAD
 h1, h2, h3, h4, h5, h6 {
   @apply font-black text-gray-800 text-center;
+=======
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-black text-gray-800;
+>>>>>>> 01c369c672a032c2745dfd37d8be73e78067b95d
 }
 
 h1 {
@@ -114,13 +148,24 @@ p {
 
 /* Animations */
 @keyframes shake {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-2px);
   }
-  20%, 40%, 60%, 80% {
+
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(2px);
   }
 }
@@ -130,9 +175,12 @@ p {
 }
 
 @keyframes bounce-toy {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-8px);
   }
@@ -143,9 +191,12 @@ p {
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(88, 204, 2, 0.4);
   }
+
   50% {
     box-shadow: 0 0 0 10px rgba(88, 204, 2, 0);
   }
@@ -189,7 +240,7 @@ span, label {
   @apply w-full bg-gray-200 rounded-full h-3 overflow-hidden border-2 border-gray-300 text-center;
 }
 
-.progress-bar-duolingo > div {
+.progress-bar-duolingo>div {
   @apply h-full rounded-full bg-emerald-500 transition-all duration-500 ease-out;
 }
 
@@ -199,9 +250,12 @@ span, label {
 }
 
 @keyframes peek {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-4px);
   }
@@ -221,6 +275,7 @@ span, label {
   @apply transition-transform duration-200 hover:scale-105;
 }
 
+<<<<<<< HEAD
 /* Icon colors */
 .icon-green {
   @apply text-emerald-500;
@@ -244,3 +299,117 @@ footer {
   padding: 1rem 0;
   color: white;
 }
+=======
+/* Quest Completion Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 20s linear infinite;
+}
+
+@keyframes spinReverseSlow {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-spin-reverse-slow {
+  animation: spinReverseSlow 25s linear infinite;
+}
+
+@keyframes popUp {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animation-pop-up {
+  animation: popUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 3.5s ease-in-out infinite 0.5s;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+  opacity: 0;
+  /* Ensure it starts invisible before animation kicks in if forwards is used */
+  animation-fill-mode: forwards;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+>>>>>>> 01c369c672a032c2745dfd37d8be73e78067b95d

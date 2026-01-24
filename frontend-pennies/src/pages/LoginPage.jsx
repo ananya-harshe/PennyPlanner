@@ -58,7 +58,10 @@ export default function LoginPage() {
         // Store token and user info in auth context
         login(data.token, data.user)
         toast.success(`Welcome back, ${data.user.username}! 🎉`)
-        
+
+        // Trigger streak animation on next home load
+        sessionStorage.setItem('showStreak', 'true')
+
         navigate('/')
       } else {
         // Register
@@ -103,7 +106,10 @@ export default function LoginPage() {
         // Store token and user info in auth context
         login(data.token, data.user)
         toast.success(`Welcome, ${data.user.username}! Let's learn about money! 💰`)
-        
+
+        // Trigger streak animation on next home load
+        sessionStorage.setItem('showStreak', 'true')
+
         navigate('/')
       }
     } catch (error) {

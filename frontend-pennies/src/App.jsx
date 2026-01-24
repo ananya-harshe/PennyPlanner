@@ -7,12 +7,14 @@ import DashboardPage from '@/pages/DashboardPage'
 import ChatbotPage from '@/pages/ChatbotPage'
 import QuestsPage from '@/pages/QuestsPage'
 
+import LeaderboardPage from '@/pages/LeaderboardPage'
 import SettingsPage from '@/pages/SettingsPage'
 import ShopPage from '@/pages/ShopPage'
 import LoginPage from '@/pages/LoginPage'
 import DesktopNavigation from '@/components/DesktopNavigation'
 import StatsSidebar from '@/components/StatsSidebar'
 import ScrollToTop from '@/components/ScrollToTop'
+import PennyChatWidget from '@/components/PennyChatWidget'
 import { Toaster } from 'sonner'
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api'
@@ -25,45 +27,36 @@ const BottomNav = () => {
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
-    { path: '/dashboard', icon: BookOpen, label: 'Dashboard' },
+    { path: '/dashboard', icon: BookOpen, label: 'Dash' },
     { path: '/quests', icon: User, label: 'Quests' },
+    { path: '/leaderboard', icon: Trophy, label: 'Rank' },
     { path: '/shop', icon: ShoppingBag, label: 'Shop' },
-    { path: '/chatbot', icon: Trophy, label: 'Advice' },
+    { path: '/settings', icon: Settings, label: 'Settings' },
   ]
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-4 border-gray-200 z-50 lg:hidden">
-      <div className="max-w-4xl mx-auto px-4 flex justify-around items-center">
+      <div className="max-w-4xl mx-auto px-1 flex justify-around items-center">
         {navItems.map((item) => (
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
-            className={`flex-1 py-4 flex flex-col items-center gap-1 ${location.pathname === item.path
+            className={`flex-1 py-3 flex flex-col items-center gap-1 ${location.pathname === item.path
               ? 'text-emerald-500 border-b-4 border-emerald-500'
               : 'text-gray-600 hover:text-emerald-500'
               } transition-colors`}
           >
-            <item.icon size={24} />
-            <span className="text-xs font-semibold">{item.label}</span>
+            <item.icon size={22} />
+            <span className="text-[10px] font-bold">{item.label}</span>
           </button>
         ))}
-        <button
-          onClick={() => navigate('/settings')}
-          className={`flex-1 py-4 flex flex-col items-center gap-1 ${location.pathname === '/settings'
-            ? 'text-emerald-500 border-b-4 border-emerald-500'
-            : 'text-gray-600 hover:text-emerald-500'
-            } transition-colors`}
-        >
-          <Settings size={24} />
-          <span className="text-xs font-semibold">Settings</span>
-        </button>
       </div>
     </nav>
   )
 }
 
 // Header Component (Mobile Only)
-const StatsHeader = () => {
+const StatsHeader = ({ onOpenChat }) => {
   return (
     <header className="bg-white border-b-4 border-gray-200 sticky top-0 z-40 lg:hidden">
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
@@ -73,6 +66,14 @@ const StatsHeader = () => {
           </div>
           <h1 className="text-2xl font-black text-gray-800">PennyWise</h1>
         </div>
+
+        <button
+          onClick={onOpenChat}
+          className="px-3 py-1.5 bg-gradient-to-br from-green-400 to-green-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-transform flex items-center gap-1.5"
+        >
+          <span className="text-lg">🐸</span>
+          <span className="text-sm">Ask!</span>
+        </button>
       </div>
     </header>
   )
@@ -88,6 +89,7 @@ export default function App() {
 
 function AppContent() {
   const { isAuthenticated, loading, user } = useAuth()
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   if (loading) {
     return (
@@ -128,13 +130,14 @@ function AppContent() {
 
             {/* Main Content Area */}
             <main className="flex-1 w-full lg:max-w-4xl lg:mx-0">
-              <StatsHeader />
+              <StatsHeader onOpenChat={() => setIsChatOpen(true)} />
               <div className="min-h-screen pb-24 lg:pb-12">
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/chatbot" element={<ChatbotPage />} />
                   <Route path="/quests" element={<QuestsPage />} />
+                  <Route path="/leaderboard" element={<LeaderboardPage />} />
                   <Route path="/shop" element={<ShopPage />} />
 
                   <Route path="/settings" element={<SettingsPage />} />
@@ -144,8 +147,11 @@ function AppContent() {
             </main>
 
             {/* Desktop Right Stats */}
-            <StatsSidebar user={user} />
+            <StatsSidebar user={user} onOpenChat={() => setIsChatOpen(true)} />
           </div>
+
+          {/* Global Chat Widget */}
+          <PennyChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
         </div>
       </BrowserRouter>
     </div>

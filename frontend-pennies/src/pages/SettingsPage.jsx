@@ -10,6 +10,7 @@ export default function SettingsPage() {
     const { logout, user } = useAuth()
 
     const [dailyGoal, setDailyGoal] = useState('')
+    const [nickname, setNickname] = useState('')
     const [loading, setLoading] = useState(false)
     const [fetching, setFetching] = useState(true)
 
@@ -17,9 +18,7 @@ export default function SettingsPage() {
     const [fileName, setFileName] = useState(null)
 
     useEffect(() => {
-        // Fetch current goal... technically we could get this from /progress or context
-        // For now, let's just initialize or fetch if needed. 
-        // Since user object might have daily_goal or we can fetch progress.
+        // Fetch current settings
         fetchProgress()
     }, [])
 
@@ -27,9 +26,8 @@ export default function SettingsPage() {
         try {
             const response = await fetch(`${API_URL}/progress`, { headers: getAuthHeaders() })
             const data = await response.json()
-            if (data.daily_goal) {
-                setDailyGoal(data.daily_goal)
-            }
+            if (data.daily_goal) setDailyGoal(data.daily_goal)
+            if (data.nickname) setNickname(data.nickname)
         } catch (e) {
             console.error("Failed to fetch settings", e)
         } finally {
@@ -37,7 +35,7 @@ export default function SettingsPage() {
         }
     }
 
-    const handleUpdateGoal = async () => {
+    const handleUpdateProfile = async () => {
         try {
             setLoading(true)
             const response = await fetch(`${API_URL}/users/profile`, {
@@ -46,14 +44,17 @@ export default function SettingsPage() {
                     ...getAuthHeaders(),
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ daily_goal: Number(dailyGoal) })
+                body: JSON.stringify({
+                    daily_goal: Number(dailyGoal),
+                    nickname: nickname
+                })
             })
 
             if (!response.ok) throw new Error('Failed to update')
 
-            toast.success('Daily goal updated successfully! 🎯')
+            toast.success('Profile updated successfully! 🤡')
         } catch (error) {
-            toast.error('Failed to update goal')
+            toast.error('Failed to update profile')
         } finally {
             setLoading(false)
         }
@@ -102,6 +103,25 @@ export default function SettingsPage() {
         <div className="p-4 lg:p-8 lg:px-10 space-y-6 pb-24 lg:pb-8 max-w-2xl mx-auto">
             <h1 className="text-2xl font-black text-gray-800 mb-6">Settings</h1>
 
+            {/* Profile Section */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm border-4 border-gray-100 mb-6">
+                <h2 className="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                    🤡 Profile Settings
+                </h2>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-bold text-gray-500 mb-2">Nickname (IT Character)</label>
+                        <input
+                            type="text"
+                            value={nickname}
+                            onChange={(e) => setNickname(e.target.value)}
+                            placeholder="Richie Tozier"
+                            className="w-full p-3 bg-gray-50 rounded-xl font-bold text-gray-800 border-2 border-gray-200 focus:border-emerald-500 outline-none transition-colors placeholder:text-gray-300"
+                        />
+                    </div>
+                </div>
+            </div>
+
             {/* Daily Goal Section */}
             <div className="bg-white rounded-3xl p-6 shadow-sm border-4 border-gray-100">
                 <h2 className="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
@@ -122,7 +142,7 @@ export default function SettingsPage() {
                                 className="flex-1 p-3 bg-gray-50 rounded-xl font-bold text-gray-800 border-2 border-gray-200 focus:border-emerald-500 outline-none transition-colors placeholder:text-gray-300"
                             />
                             <button
-                                onClick={handleUpdateGoal}
+                                onClick={handleUpdateProfile}
                                 disabled={loading}
                                 className="bg-emerald-500 hover:bg-emerald-600 text-white p-3 rounded-xl font-bold transition-all flex items-center gap-2"
                             >
