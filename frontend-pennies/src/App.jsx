@@ -59,8 +59,6 @@ const BottomNav = () => {
   )
 }
 
-import AppIcon from '@/assets/AppIcon.png'
-
 // Header Component (Mobile Only)
 const StatsHeader = ({ onOpenChat }) => {
   return (
