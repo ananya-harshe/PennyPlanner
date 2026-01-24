@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { Toaster } from 'sonner'
-import { Home, BookOpen, Trophy, User, Wallet, LogOut, Settings } from 'lucide-react'
+import { Home, BookOpen, Trophy, User, Wallet, LogOut, Settings, ShoppingBag } from 'lucide-react'
 import { AuthProvider, useAuth } from '@/store/authContext'
 import HomePage from '@/pages/HomePage'
 import DashboardPage from '@/pages/DashboardPage'
@@ -10,7 +10,7 @@ import ChatbotPage from '@/pages/ChatbotPage'
 import QuestsPage from '@/pages/QuestsPage'
 import LearningPage from '@/pages/LearningPage'
 import SettingsPage from '@/pages/SettingsPage'
-import SpendingPage from '@/pages/SpendingPage'
+import ShopPage from '@/pages/ShopPage'
 import LoginPage from '@/pages/LoginPage'
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api'
@@ -24,8 +24,9 @@ const BottomNav = () => {
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
     { path: '/dashboard', icon: BookOpen, label: 'Dashboard' },
-    { path: '/chatbot', icon: Trophy, label: 'Advice' },
     { path: '/quests', icon: User, label: 'Quests' },
+    { path: '/shop', icon: ShoppingBag, label: 'Shop' },
+    { path: '/chatbot', icon: Trophy, label: 'Advice' },
   ]
 
   return (
@@ -120,7 +121,7 @@ function AppContent() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/quests" element={<QuestsPage />} />
-          <Route path="/spending" element={<SpendingPage />} />
+          <Route path="/shop" element={<ShopPage />} />
           <Route path="/learn" element={<LearningPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>

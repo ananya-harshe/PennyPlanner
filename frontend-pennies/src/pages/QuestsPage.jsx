@@ -1,158 +1,346 @@
 import React, { useState, useEffect } from 'react'
-import { Star, BookOpen } from 'lucide-react'
+import { Star, Swords, Zap, Activity } from 'lucide-react'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { toast } from 'sonner'
-import { PennyMascot, Progress } from '@/components/PennyComponents'
-import QuizScreen from '@/components/QuizScreen'
+import { PennyMascot } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
 
+// Multi-step Quiz Modal for Quest
+const QuestQuizModal = ({ quest, onClose, onComplete }) => {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [selectedOption, setSelectedOption] = useState(null)
+  const [submitted, setSubmitted] = useState(false)
+  const [isCorrect, setIsCorrect] = useState(null)
+
+  // Ensure quest.questions exists and use it
+  const questions = quest.questions || []
+  const currentQuestion = questions[currentStep]
+
+  // Safety check
+  if (!currentQuestion) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-3xl p-6">
+          <p>Error: Invalid quest data. Please refresh quests.</p>
+          <button onClick={onClose} className="mt-4 btn-3d-green w-full">Close</button>
+        </div>
+      </div>
+    )
+  }
+
+  const handleCheckAnswer = () => {
+    if (selectedOption === null) return
+
+    const correct = selectedOption === currentQuestion.correct_answer
+    setIsCorrect(correct)
+    setSubmitted(true)
+  }
+
+  const handleNext = async () => {
+    if (currentStep < questions.length - 1) {
+      // Next question
+      setCurrentStep(prev => prev + 1)
+      setSelectedOption(null)
+      setSubmitted(false)
+      setIsCorrect(null)
+    } else {
+      // Finish Quest - Immediate Close to prevent double-clicks
+      onClose();
+
+      try {
+        const response = await fetch(`${API_URL}/quests/${quest._id}/complete`, {
+          method: 'POST',
+          headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+        })
+        const result = await response.json()
+
+        if (result.success) {
+          onComplete(result)
+        } else {
+          // If it failed but we closed the modal, show the error toast
+          toast.error(result.message)
+        }
+      } catch (e) {
+        toast.error("Failed to complete quest")
+      }
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-3xl p-6 max-w-md w-full animate-bounce-in" onClick={e => e.stopPropagation()}>
+
+        {/* Header with Progress Steps */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-xl font-black text-gray-800">{quest.title}</h3>
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              Question {currentStep + 1} of {questions.length}
+            </span>
+          </div>
+          {/* Simple Step Dots */}
+          <div className="flex gap-1">
+            {questions.map((_, idx) => (
+              <div key={idx} className={`w-2 h-2 rounded-full ${idx <= currentStep ? 'bg-emerald-500' : 'bg-gray-200'}`} />
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-emerald-50 p-4 rounded-xl border-2 border-emerald-100 mb-4">
+          <p className="font-bold text-gray-800">{currentQuestion.question}</p>
+        </div>
+
+        <div className="space-y-2 mb-6">
+          {currentQuestion.options.map((opt, idx) => (
+            <button
+              key={idx}
+              onClick={() => !submitted && setSelectedOption(idx)}
+              disabled={submitted}
+              className={`w-full p-3 rounded-xl text-left text-sm font-semibold border-2 transition-all
+                        ${submitted && idx === currentQuestion.correct_answer ? 'bg-green-100 border-green-500 text-green-700' : ''}
+                        ${submitted && idx === selectedOption && idx !== currentQuestion.correct_answer ? 'bg-red-100 border-red-500 text-red-700' : ''}
+                        ${!submitted && selectedOption === idx ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-gray-200 hover:border-indigo-300'}
+                    `}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+
+        {submitted && (
+          <div className={`text-center font-black p-3 rounded-xl mb-4 ${isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+            {isCorrect ? '🎉 Correct!' : '❌ Incorrect'}
+          </div>
+        )}
+
+        {submitted && !isCorrect && (
+          <div className="text-xs text-gray-500 mb-4 p-3 bg-gray-50 rounded-xl">
+            <span className="font-bold">Explanation:</span> {currentQuestion.explanation}
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {!submitted ? (
+          <button
+            onClick={handleCheckAnswer}
+            disabled={selectedOption === null}
+            className="w-full py-3 bg-emerald-500 text-white font-black rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors"
+          >
+            Check Answer
+          </button>
+        ) : (
+          isCorrect ? (
+            <button
+              onClick={handleNext}
+              className="w-full py-3 bg-emerald-500 text-white font-black rounded-2xl hover:bg-emerald-600 transition-colors animate-pulse"
+            >
+              {currentStep < questions.length - 1 ? 'Next Question →' : 'Complete Quest! 🏆'}
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setSubmitted(false)
+                setIsCorrect(null)
+                setSelectedOption(null)
+              }}
+              className="w-full py-3 bg-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-300"
+            >
+              Try Again
+            </button>
+          )
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function QuestsPage() {
-  const [lessons, setLessons] = useState([])
+  const [quests, setQuests] = useState([])
   const [loading, setLoading] = useState(true)
-  const [completedLessons, setCompletedLessons] = useState([])
-  const [activeQuiz, setActiveQuiz] = useState(null)
+  const [activeQuest, setActiveQuest] = useState(null)
+  const [learningStats, setLearningStats] = useState([])
+  const [totalXP, setTotalXP] = useState(0)
 
   useEffect(() => {
-    fetchLessons()
+    fetchQuests()
   }, [])
 
-  const fetchLessons = async () => {
+  const fetchQuests = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${API_URL}/lessons`, {
-        headers: getAuthHeaders()
-      })
+      const response = await fetch(`${API_URL}/quests`, { headers: getAuthHeaders() })
       const data = await response.json()
-      setLessons(data)
+      setQuests(data)
+
+      // Fetch progress data for graph
+      const progressResponse = await fetch(`${API_URL}/progress`, { headers: getAuthHeaders() })
+      const progressData = await progressResponse.json()
+      setTotalXP(progressData.xp || 0)
+
+      // Process XP history
+      const history = progressData.xp_history || []
+      const last7Days = []
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date()
+        d.setDate(d.getDate() - i)
+        const dateStr = d.toISOString().split('T')[0]
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' })
+        const found = history.find(h => h.date === dateStr)
+        last7Days.push({
+          name: dayName,
+          xp: found ? found.xp : 0
+        })
+      }
+      setLearningStats(last7Days)
+
     } catch (error) {
-      console.error('Failed to fetch lessons:', error)
-      toast.error('Failed to load lessons')
+      console.error("Failed to fetch data", error)
+      toast.error("Failed to load quests")
     } finally {
       setLoading(false)
     }
   }
 
-  const handleStartLesson = (lesson) => {
-    if (lesson.is_locked) {
-      toast.error('Complete previous lessons to unlock this one!')
-      return
-    }
-
-    // Open the quiz screen
-    setActiveQuiz({
-      lessonId: lesson.id,
-      lessonTitle: lesson.title
-    })
+  const handleQuestComplete = (result) => {
+    toast.success(`Quest Complete! +${result.xp_earned} XP`)
+    setActiveQuest(null)
+    fetchQuests()
   }
 
-  const handleQuizComplete = (result) => {
-    if (result.passed) {
-      setCompletedLessons(prev => [...prev, activeQuiz.lessonId])
-      toast.success(`🎉 Quest completed! You earned ${Math.round(result.score / result.total * 100)} XP!`)
-    }
-    setActiveQuiz(null)
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen pt-24 pb-24 gap-4">
+        <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-500 font-bold animate-pulse">Generating your financial challenges... 🐸</p>
+      </div>
+    )
   }
-
-  const getCategoryColor = (category) => {
-    switch (category) {
-      case 'budgeting':
-        return 'bg-blue-100 text-blue-700 border-blue-300'
-      case 'investing':
-        return 'bg-purple-100 text-purple-700 border-purple-300'
-      case 'credit':
-        return 'bg-orange-100 text-orange-700 border-orange-300'
-      default:
-        return 'bg-gray-100 text-gray-700'
-    }
-  }
-
-  const completedCount = completedLessons.length
-  const totalXP = completedCount * 50
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24 pt-24">
-      {/* Quiz Modal */}
-      {activeQuiz && (
-        <QuizScreen
-          lessonId={activeQuiz.lessonId}
-          lessonTitle={activeQuiz.lessonTitle}
-          onClose={() => setActiveQuiz(null)}
-          onComplete={handleQuizComplete}
+      {activeQuest && (
+        <QuestQuizModal
+          quest={activeQuest}
+          onClose={() => setActiveQuest(null)}
+          onComplete={handleQuestComplete}
         />
       )}
 
-      <PennyMascot message="Complete quests to earn XP and unlock rewards! 🏆" size="medium" animate />
+      <PennyMascot
+        message="Master your money with these interactive challenges! 🏆"
+        size="medium"
+        animate
+      />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-3 px-4 my-6">
-        <div className="card-3d bg-gradient-to-br from-purple-100 to-purple-50 p-4 text-center">
-          <div className="text-purple-600 font-bold text-xl">{completedCount}</div>
-          <div className="text-gray-600 text-xs">Completed</div>
+      <div className="px-4 mt-6 mb-4">
+        {/* Learning Activity Graph */}
+        <div className="card-3d p-6 border-4 border-indigo-200 mb-8 bg-white">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-indigo-500 rounded-2xl p-3">
+                <Activity className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-gray-800">Learning Activity</h3>
+                <p className="text-sm text-gray-500 font-bold">Total XP: {totalXP}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-64 w-full min-h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={learningStats}>
+                <defs>
+                  <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#6B7280', fontSize: 12, fontWeight: 'bold' }}
+                  dy={10}
+                />
+                <YAxis hide={true} />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: '16px',
+                    border: 'none',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                    padding: '12px'
+                  }}
+                  cursor={{ stroke: '#6366f1', strokeWidth: 2, strokeDasharray: '5 5' }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="xp"
+                  stroke="#6366f1"
+                  strokeWidth={4}
+                  fillOpacity={1}
+                  fill="url(#colorXp)"
+                  animationDuration={1500}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-        <div className="card-3d bg-gradient-to-br from-orange-100 to-orange-50 p-4 text-center">
-          <div className="text-orange-600 font-bold text-xl">{totalXP}</div>
-          <div className="text-gray-600 text-xs">Total XP</div>
-        </div>
-        <div className="card-3d bg-gradient-to-br from-emerald-100 to-emerald-50 p-4 text-center">
-          <div className="text-emerald-600 font-bold text-xl">{lessons.length}</div>
-          <div className="text-gray-600 text-xs">Quests</div>
+
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-black text-gray-800 flex items-center gap-2">
+            <Swords className="text-red-500" />
+            Active Quests
+          </h2>
+          <span className="text-xs font-bold bg-gray-200 text-gray-600 px-3 py-1 rounded-full">
+            {quests.length} Remaining
+          </span>
         </div>
       </div>
 
-      {/* Lessons List */}
       <div className="px-4 space-y-4">
-        {loading ? (
-          <div className="text-center py-8 text-gray-600">
-            <p className="text-sm">Loading quests...</p>
-          </div>
-        ) : lessons.length === 0 ? (
-          <div className="text-center py-8 text-gray-600">
-            <p className="text-sm">No quests available</p>
+        {quests.length === 0 ? (
+          <div className="text-center p-8 bg-white rounded-3xl border-4 border-gray-100">
+            <p className="text-gray-500 font-bold mb-4">All quests completed! 🎉</p>
+            <button
+              onClick={fetchQuests}
+              className="px-6 py-3 bg-emerald-500 text-white font-black rounded-xl hover:bg-emerald-600 transition-colors"
+            >
+              Generate New Batch
+            </button>
           </div>
         ) : (
-          lessons.map(lesson => (
-            <div
-              key={lesson.id}
-              className={`card-3d p-4 border-4 border-gray-200 transition-opacity ${completedLessons.includes(lesson.id) ? 'opacity-60' : ''
-                }`}
-            >
-              <div className="flex items-start gap-3 mb-3">
-                <div className="text-2xl">{lesson.icon || '📖'}</div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-800">{lesson.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{lesson.description}</p>
+          quests.map(quest => (
+            <div key={quest._id} className="card-3d p-5 border-4 border-gray-200">
+              <div className="flex justify-between items-start mb-2">
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg
+                            ${quest.type === 'Spending Slayer' ? 'bg-red-100 text-red-600' :
+                    quest.type === 'Asset Builder' ? 'bg-blue-100 text-blue-600' :
+                      'bg-purple-100 text-purple-600'}
+                        `}>
+                  {quest.type}
+                </span>
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                  <span className="font-bold text-gray-700">{quest.xp_reward} XP</span>
                 </div>
-                {lesson.is_locked && (
-                  <span className="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded-lg">
-                    🔒 Locked
-                  </span>
-                )}
               </div>
 
-              <div className="flex items-center gap-2 mb-3">
-                <span
-                  className={`text-xs font-bold px-2 py-1 rounded-lg border-2 ${getCategoryColor(
-                    lesson.category
-                  )}`}
-                >
-                  {lesson.category.charAt(0).toUpperCase() + lesson.category.slice(1)}
-                </span>
-                <div className="flex items-center gap-1 ml-auto">
-                  <Star className="w-4 h-4 text-yellow-500" />
-                  <span className="text-sm font-bold text-gray-800">{lesson.xp_reward || 50} XP</span>
-                </div>
+              <h3 className="text-lg font-black text-gray-800 mb-1">{quest.title}</h3>
+              <p className="text-sm text-gray-600 mb-4">{quest.description}</p>
+
+              <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 mb-4">
+                <p className="text-xs text-gray-500 font-bold mb-1">Penny's Reason:</p>
+                <p className="text-xs text-gray-500 italic">"{quest.generated_reason}"</p>
               </div>
 
               <button
-                onClick={() => handleStartLesson(lesson)}
-                disabled={lesson.is_locked || completedLessons.includes(lesson.id)}
-                className={`w-full px-4 py-3 rounded-xl font-bold text-sm transition-all ${completedLessons.includes(lesson.id)
-                    ? 'bg-green-100 text-green-600 cursor-not-allowed border-2 border-green-300'
-                    : lesson.is_locked
-                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      : 'btn-3d-green text-white'
-                  }`}
+                onClick={() => setActiveQuest(quest)}
+                className="w-full py-3 btn-3d-green text-white font-bold rounded-xl flex items-center justify-center gap-2"
               >
-                {completedLessons.includes(lesson.id) ? '✓ Quest Completed' : lesson.is_locked ? '🔒 Locked' : '🎮 Start Quest'}
+                <Zap size={18} />
+                Start Quest (4 Questions)
               </button>
             </div>
           ))
@@ -161,4 +349,3 @@ export default function QuestsPage() {
     </div>
   )
 }
-

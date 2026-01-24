@@ -16,13 +16,19 @@ const generateWithRetry = async (prompt, retries = 3) => {
   const model = initGemini();
   for (let i = 0; i < retries; i++) {
     try {
+      const apiCallStart = Date.now();
+      console.log(`   🔵 [API CALL ${i + 1}/${retries}] Sending request to Gemini...`);
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      return response.text();
+      const text = response.text();
+      const apiCallTime = Date.now() - apiCallStart;
+      console.log(`   ✅ [API CALL ${i + 1}/${retries}] Received response in ${apiCallTime}ms (${(apiCallTime / 1000).toFixed(2)}s)`);
+      return text;
     } catch (error) {
+      console.log(`   ❌ [API CALL ${i + 1}/${retries}] Failed:`, error.message);
       if ((error.status === 429 || error.message.includes('429')) && i < retries - 1) {
         const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-        console.log(`⚠️ Gemini 429 (Rate Limit). Retrying in ${Math.round(delay)}ms...`);
+        console.log(`   ⚠️  [RETRY] Gemini 429 (Rate Limit). Retrying in ${Math.round(delay)}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
@@ -197,14 +203,6 @@ export const generateQuizQuestions = async (lessonTopic, userProfile = {}) => {
     return validatedQuestions;
   } catch (error) {
     console.error('❌ Gemini quiz generation error:', error.message);
-    console.error('Full error details:', {
-      name: error.name,
-      message: error.message,
-      status: error.status,
-      stack: error.stack?.split('\n').slice(0, 3).join('\n')
-    });
-    console.log('⚠️ Falling back to default questions...');
-
     // Fallback if generation fails
     return [
       {
@@ -229,3 +227,141 @@ export const generateQuizQuestions = async (lessonTopic, userProfile = {}) => {
   }
 };
 
+// Generate procedural quests based on transaction history
+export const generateProceduralQuests = async (transactions = []) => {
+  try {
+    console.log('\n🎲 [PROCEDURAL QUESTS] Starting generation...');
+    const totalStart = Date.now();
+
+    // Build context
+    const contextStart = Date.now();
+    let contextStr = "User has limited transaction history.";
+    let totalSpent = 0;
+    let topCategories = "None"; // Default value
+
+    if (transactions.length > 0) {
+      // Analyze for patterns
+      totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
+      const categories = {};
+      transactions.forEach(t => {
+        categories[t.category] = (categories[t.category] || 0) + t.amount;
+      });
+      topCategories = Object.entries(categories)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([cat, amount]) => `${cat} ($${amount.toFixed(2)})`)
+        .join(', ');
+
+      contextStr = `Recent spending: Total $${totalSpent.toFixed(2)}. Top categories: ${topCategories}. 
+      Recent transactions: ${transactions.slice(0, 8).map(t => `${t.description} ($${t.amount.toFixed(2)}, ${t.category})`).join(', ')}`;
+    }
+    console.log(`   ⏱️  [CONTEXT BUILD] Created context in ${Date.now() - contextStart}ms`);
+
+    const prompt = `You are the "Procedural Quest Architect" for a gamified finance app. 🐸
+    Objective: Generate exactly 3 unique, diverse, and engaging financial quests.
+    
+    Context:
+    - User has spent: $${totalSpent.toFixed(2)} recently.
+    - Top Categories: ${topCategories}.
+    
+    CRITICAL INSTRUCTION: DO NOT use generic topics like "Latte Effect" or "50/30/20 Rule" unless they heavily apply to the user's recent transactions.
+    Instead, dive deep into the "Infinite Library of Finance". 
+    Choose 3 RANDOM concepts from these diverse fields:
+    - Behavioral Economics (e.g. Nudging, Anchoring, Loss Aversion)
+    - Investment History (e.g. Tulip Mania, Dot-com bubble)
+    - Frugal Living Hacks (e.g. Meal prepping, DIY repairs)
+    - Advanced Personal Finance (e.g. Tax-loss harvesting, Roth conversions)
+    - Financial Psychology (e.g. Money scripts, Impulse control)
+    - Micro-economics (e.g. Supply & Demand in daily life)
+    
+    Make the topics SURPRISING and EDUCATIONAL.
+    
+    Output: A valid JSON array of 3 objects. Match this schema exactly:
+    [
+      {
+        "title": "Quest Title (Catchy & Creative)",
+        "description": "Brief, intriguing intro.",
+        "type": "Spending Slayer" | "Asset Builder" | "Knowledge Heist" | "Lifestyle Pivot",
+        "difficulty": "Easy" | "Medium" | "Hard",
+        "xp_reward": Number (100-300),
+        "generated_reason": "Why this specific, unique topic was chosen.",
+        "questions": [
+            // EXACTLY 4 Questions per Quest
+            {
+                "question": "Question text...",
+                "options": ["A", "B", "C", "D"],
+                "correct_answer": 0, // index 0-3
+                "explanation": "Educational, fun explanation. 🐸",
+                "context_source": "theory" // or "transaction" if referencing user data
+            }
+        ]
+      }
+    ]
+    
+    Ensure questions are mixed: some concept-based, some practical.`;
+
+    console.log(`   📝 [PROMPT] Prompt length: ${prompt.length} characters`);
+    const geminiStart = Date.now();
+    const text = await generateWithRetry(prompt);
+    const geminiTime = Date.now() - geminiStart;
+    console.log(`   ⏱️  [GEMINI TOTAL] API call and response handling took ${geminiTime}ms (${(geminiTime / 1000).toFixed(2)}s)`);
+
+    // Clean up potential markdown
+    const parseStart = Date.now();
+    let jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const arrayMatch = jsonStr.match(/\[[\s\S]*\]/);
+    if (arrayMatch) jsonStr = arrayMatch[0];
+
+    const quests = JSON.parse(jsonStr);
+    console.log(`   ⏱️  [JSON PARSE] Parsed response in ${Date.now() - parseStart}ms`);
+    console.log(`   ✅ [SUCCESS] Generated ${quests.length} quests with ${quests.reduce((sum, q) => sum + q.questions.length, 0)} total questions`);
+
+    const totalTime = Date.now() - totalStart;
+    console.log(`🏁 [PROCEDURAL QUESTS] Complete in ${totalTime}ms (${(totalTime / 1000).toFixed(2)}s)\n`);
+    return quests;
+  } catch (error) {
+    console.error('❌ [QUEST GEN ERROR] Quest generation error:', error);
+    console.log('   ⚠️  [FALLBACK] Using fallback quest data');
+    // Fallback quests
+    return [
+      {
+        title: "The 50/30/20 Rule",
+        description: "Master the classic budgeting strategy.",
+        type: "Knowledge Heist",
+        difficulty: "Easy",
+        xp_reward: 100,
+        generated_reason: "Essential budgeting knowledge.",
+        questions: [
+          {
+            question: "What does the '50' stand for in the 50/30/20 rule?",
+            options: ["Savings", "Wants", "Needs", "Debt"],
+            correct_answer: 2,
+            explanation: "50% of your income should go to Needs.",
+            context_source: "theory"
+          },
+          {
+            question: "If you earn $1000, how much should go to savings/debt?",
+            options: ["$100", "$200", "$300", "$500"],
+            correct_answer: 1,
+            explanation: "20% of $1000 is $200.",
+            context_source: "theory"
+          },
+          {
+            question: "Is a Netflix subscription a Need or a Want?",
+            options: ["Need", "Want", "Investment", "Emergency"],
+            correct_answer: 1,
+            explanation: "Streaming services are Wants (30% bucket).",
+            context_source: "theory"
+          },
+          {
+            question: "Should you pay minimum debt payments from the 20% bucket?",
+            options: ["Yes", "No", "Maybe", "Only if high interest"],
+            correct_answer: 0,
+            explanation: "Debt repayment falls into the 20% Savings/Debt category.",
+            context_source: "theory"
+          }
+        ]
+      }
+    ];
+  }
+};

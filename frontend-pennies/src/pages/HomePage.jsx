@@ -76,25 +76,15 @@ export default function HomePage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="w-full">
         <button
           onClick={() => navigate('/learn')}
-          className="card-3d p-6 border-4 border-gray-200 hover:scale-105 transition-transform flex flex-col items-center gap-2"
+          className="w-full card-3d p-6 border-4 border-gray-200 hover:scale-105 transition-transform flex flex-col items-center gap-2"
           data-testid="continue-learning-btn"
         >
           <BookOpen size={32} className="text-emerald-500" />
           <span className="font-bold text-gray-700 text-sm text-center">Continue Learning</span>
           <span className="text-xs text-gray-500">{progress?.completed_lessons?.length || 0} done</span>
-        </button>
-
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="card-3d p-6 border-4 border-gray-200 hover:scale-105 transition-transform flex flex-col items-center gap-2"
-          data-testid="daily-challenge-btn"
-        >
-          <Calendar size={32} className="text-orange-500" />
-          <span className="font-bold text-gray-700 text-sm text-center">Dashboard</span>
-          <span className="text-xs text-gray-500">View stats</span>
         </button>
       </div>
 
@@ -122,7 +112,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-gray-700">Your Spending Habits</h3>
             <button
-              onClick={() => navigate('/spending')}
+              onClick={() => navigate('/dashboard')}
               className="text-emerald-500 text-sm font-bold flex items-center gap-1"
             >
               View All <ChevronRight size={16} />

@@ -13,6 +13,7 @@ import progressRoutes from './routes/progress.js';
 import pennyRoutes from './routes/penny.js';
 import transactionRoutes from './routes/transactions.js';
 import userRoutes from './routes/users.js';
+import questRoutes from './routes/quests.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/penny', pennyRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/quests', questRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
