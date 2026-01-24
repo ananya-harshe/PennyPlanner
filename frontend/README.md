@@ -1,4 +1,54 @@
-# React + TypeScript + Vite
+# PennyPlanner
+
+A full-stack application for financial planning with React frontend and Python backend.
+
+## Backend Setup
+
+The backend is built with Python and uses MongoDB for data storage.
+
+### Prerequisites
+- Python 3.8 or higher
+- MongoDB database
+- Virtual environment (recommended)
+
+### Installation
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   # On Windows:
+   venv\Scripts\activate
+   # On macOS/Linux:
+   source venv/bin/activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Environment Variables
+
+Create a `.env` file in the backend directory with the following variables:
+```
+MONGO_SRV=your_mongodb_connection_string
+DATABASE=your_database_name
+```
+
+### Running the Backend
+
+To run the backend server:
+```bash
+python -m your_main_backend_file.py
+```
+(Note: Update this with the actual command to run your backend server)
+
+## Frontend Setup
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
