@@ -1,32 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Macondo&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* @utility corner-scoop {
+  corner-shape: scoop;
+} */
+
+.macondo-regular {
+  font-family: "Macondo", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
 * {
-  @apply antialiased;
-  font-family: 'Nunito', system-ui, sans-serif;
+  @apply antialiased text-center;
+  font-family: "Macondo", cursive;
+  text-decoration: none;
 }
 
 html {
-  font-family: 'Nunito', system-ui, sans-serif;
+  font-family: "Macondo", cursive;
 }
 
 html,
 body {
-  @apply m-0 p-0 w-full h-full bg-gray-100;
+  background-image: url('assets/skyblue.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  @apply m-0 p-0 w-full h-full;
+}
+
+header {
+  background-image: url('assets/cloud.png');
+  background-size: cover;
+  padding: 1rem 0;
 }
 
 /* Global background */
-body {
-  @apply bg-gradient-to-b from-gray-50 to-gray-100;
-}
+/* body {
+  background-color: transparent;
+} */
 
 /* Duolingo 3D Button Effect */
+.btn-3d {
+  @apply transition-all duration-100 active:translate-y-1 active:border-b-2;
+  box-shadow: 0 4px 0 0 currentColor;
+}
+
 .btn-3d-green {
   @apply bg-emerald-500 text-white font-black rounded-2xl px-6 py-3 border-b-4 border-emerald-700 hover:bg-emerald-600 active:translate-y-1 active:border-b-2;
   transition: all 0.1s ease-out;
+}
+
+.btn-3d-green:active {
+  @apply translate-y-1 border-b-2;
 }
 
 .btn-3d-blue {
@@ -39,9 +68,21 @@ body {
   transition: all 0.1s ease-out;
 }
 
+.btn-3d-orange {
+  @apply bg-orange-500 text-white font-black rounded-2xl px-6 py-3 border-b-4 border-orange-700 hover:bg-orange-600 active:translate-y-1 active:border-b-2;
+  transition: all 0.1s ease-out;
+}
+
 /* Cards with rounded Duolingo style */
 .card-3d {
-  @apply rounded-[32px] bg-white shadow-lg border-2 border-gray-200 overflow-hidden;
+  @apply rounded-[32px] bg-pink-100 shadow-lg border-2 border-pink-200 overflow-hidden;
+  mask-image: radial-gradient(32px at 0 0, #0000 98%, #000 101%),
+              radial-gradient(32px at 100% 0, #0000 98%, #000 101%),
+              radial-gradient(32px at 0 100%, #0000 98%, #000 101%),
+              radial-gradient(32px at 100% 100%, #0000 98%, #000 101%);
+  mask-composite: intersect;
+  -webkit-mask-composite: destination-in; /* Support for older webkit */
+
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
@@ -52,7 +93,7 @@ body {
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  @apply font-black text-gray-800;
+  @apply font-black text-gray-800 text-center;
 }
 
 h1 {
@@ -68,7 +109,7 @@ h3 {
 }
 
 p {
-  @apply text-gray-700 leading-relaxed;
+  @apply text-gray-700 leading-relaxed text-center;
 }
 
 /* Animations */
@@ -133,9 +174,19 @@ p {
   @apply text-gray-600 font-bold hover:text-emerald-500 transition-colors duration-200;
 }
 
+/* Stats pill styling */
+.stat-pill {
+  @apply inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full border-2 border-gray-300 font-bold text-gray-800 text-center;
+}
+
+/* Label and span text centering */
+span, label {
+  @apply text-center;
+}
+
 /* Progress bar */
 .progress-bar-duolingo {
-  @apply w-full bg-gray-200 rounded-full h-3 overflow-hidden border-2 border-gray-300;
+  @apply w-full bg-gray-200 rounded-full h-3 overflow-hidden border-2 border-gray-300 text-center;
 }
 
 .progress-bar-duolingo > div {
@@ -168,4 +219,28 @@ p {
 /* Hover scale */
 .hover-scale {
   @apply transition-transform duration-200 hover:scale-105;
+}
+
+/* Icon colors */
+.icon-green {
+  @apply text-emerald-500;
+}
+
+.icon-blue {
+  @apply text-sky-500;
+}
+
+.icon-red {
+  @apply text-red-500;
+}
+
+.icon-orange {
+  @apply text-orange-500;
+}
+
+footer {
+  background-image: url('assets/grassbottom.jpg');
+  background-size: cover;
+  padding: 1rem 0;
+  color: white;
 }
