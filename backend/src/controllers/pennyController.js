@@ -1,4 +1,4 @@
-import { generatePennyTip, generatePennyMessage, chatWithPenny, generateSpendingInsights } from '../services/geminiService.js';
+import { generatePennyTip, generatePennyMessage, chatWithPenny, generateSpendingInsights, analyzeFuturePlanning } from '../services/geminiService.js';
 import Transaction from '../models/Transaction.js';
 
 export const getPennyTip = async (req, res) => {
@@ -73,3 +73,26 @@ export const getPennyInsights = async (req, res) => {
   }
 };
 
+export const getFuturePlanningAnalysis = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    let transactions = [];
+
+    if (userId) {
+      // Fetch 60 days of history for analysis
+      const sixtyDaysAgo = new Date();
+      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+      transactions = await Transaction.find({
+        user_id: userId,
+        date: { $gte: sixtyDaysAgo }
+      }).sort({ date: -1 });
+    }
+
+    const analysis = await analyzeFuturePlanning(transactions, userId);
+    res.json(analysis);
+  } catch (error) {
+    console.error('Future planning error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};

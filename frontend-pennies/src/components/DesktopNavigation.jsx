@@ -8,6 +8,7 @@ const navItems = [
     { path: '/quests', icon: User, label: 'Quests' },
     { path: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
     { path: '/shop', icon: ShoppingBag, label: 'Shop' },
+    { path: '/future-planning', icon: Sparkles, label: 'Future' },
 ]
 
 export default function DesktopNavigation() {

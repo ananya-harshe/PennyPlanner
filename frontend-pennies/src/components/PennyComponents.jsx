@@ -6,7 +6,7 @@ import SurprisedPenny from '@/assets/SurprisedPenny.png'
 import ScholarlyPenny from '@/assets/ScholarlyPenny.png'
 import TalkingPenny from '@/assets/TalkingPenny.png'
 import ThinkingPenny from '@/assets/ThinkingPenny.png'
-import PomPomPenny from '@/assets/Pom Pom Penny.png'
+import PomPomPenny from '@/assets/PomPomPenny.png'
 
 export const PennyMascot = ({ message, size = 'medium', mood = 'happy', showBubble = true, animate = true }) => {
   const sizes = {

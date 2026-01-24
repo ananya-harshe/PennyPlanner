@@ -378,3 +378,125 @@ export const generateProceduralQuests = async (transactions = []) => {
     ];
   }
 };
+
+// In-memory cache for future planning analysis (1 hour TTL)
+const futurePlanningCache = new Map();
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+// Analyze spending for Future Planning (Wealth Projection)
+export const analyzeFuturePlanning = async (transactions = [], userId = null) => {
+  try {
+    // Check cache first
+    if (userId && futurePlanningCache.has(userId)) {
+      const cached = futurePlanningCache.get(userId);
+      if (Date.now() - cached.timestamp < CACHE_TTL_MS) {
+        console.log('🔮 [FUTURE PLANNING] Returning cached result');
+        return cached.data;
+      }
+    }
+
+    console.log('\n🔮 [FUTURE PLANNING] Starting analysis...');
+    const totalStart = Date.now();
+
+    // 1. Prepare Context - REDUCED to 20 transactions for speed
+    let contextStr = "No recent transactions.";
+    if (transactions.length > 0) {
+      contextStr = transactions.slice(0, 20).map(t => {
+        const dateStr = t.date ? new Date(t.date).toISOString().split('T')[0] : 'N/A';
+        return `${dateStr}: ${t.description} ($${t.amount}, ${t.category})`;
+      }).join('\n');
+    }
+
+    // SHORTENED prompt for faster response
+    const prompt = `Analyze spending and find recurring non-essential expenses.
+Transactions:
+${contextStr}
+
+Return JSON only:
+{"recurring_items":[{"name":"Item","amount":5,"frequency":"daily","monthly_cost":150}],"total_monthly_savings":150,"commentary":"Short encouraging message about future savings potential. Use 🐸."}`;
+
+    // 2. Call Gemini
+    const text = await generateWithRetry(prompt);
+
+    // 3. Parse Response
+    let jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/); // Match valid JSON object
+    if (jsonMatch) jsonStr = jsonMatch[0];
+
+    let analysis;
+    try {
+      analysis = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error('❌ [FUTURE PLANNING] JSON Parse Error:', parseError);
+      console.log('   Raw Text:', text);
+      console.log('   Cleaned JSON:', jsonStr);
+      throw new Error('Failed to parse Gemini response');
+    }
+
+    // 4. Calculate Projections (Deterministic Math)
+    // We will project for 1, 3, and 5 years.
+    // Scenarios: 
+    // A) Cash (0% growth) - Baseline
+    // B) High Yield Savings (4% APY)
+    // C) Market Investment (7% APY)
+
+    const monthlyContribution = analysis.total_monthly_savings || 100; // Fallback to $100 if 0
+    const years = [1, 3, 5];
+    const projections = [];
+
+    // Helper for compound interest with monthly contributions
+    // FV = P * (((1 + r)^n - 1) / r)
+    // P = monthly payment, r = monthly interest rate, n = number of months
+    const calculateFV = (monthly, annualRate, years) => {
+      const r = annualRate / 12;
+      const n = years * 12;
+      if (r === 0) return monthly * n;
+      return monthly * ((Math.pow(1 + r, n) - 1) / r);
+    };
+
+    // Helper for Lump Sum (FV = PV * (1+r)^n)
+    // We'll assume the user has the equivalent of 1 year of these savings ALREADY as a lump sum "what if" comparison
+    const calculateLumpSum = (principal, annualRate, years) => {
+      return principal * Math.pow(1 + annualRate, years);
+    };
+
+    years.forEach(year => {
+      projections.push({
+        year: year,
+        cash_kept: Math.round(monthlyContribution * 12 * year),
+        dca_hys_4pct: Math.round(calculateFV(monthlyContribution, 0.04, year)),
+        dca_market_7pct: Math.round(calculateFV(monthlyContribution, 0.07, year)),
+        lump_sum_market_7pct: Math.round(calculateLumpSum(monthlyContribution * 12, 0.07, year)) // Comparison: If they invested 1 year's worth today
+      });
+    });
+
+    const result = {
+      ...analysis,
+      projections
+    };
+
+    // Store in cache
+    if (userId) {
+      futurePlanningCache.set(userId, { data: result, timestamp: Date.now() });
+    }
+
+    console.log(`✅ [FUTURE PLANNING] Analysis complete. Found $${analysis.total_monthly_savings}/mo potential savings.`);
+    return result;
+
+  } catch (error) {
+    console.error('❌ [FUTURE PLANNING ERROR]', error);
+    // Fallback data
+    return {
+      recurring_items: [
+        { name: "Small daily habits", amount: 5, frequency: "daily", monthly_cost: 150 }
+      ],
+      total_monthly_savings: 150,
+      commentary: "Small changes add up! Saving $5 a day is a great start. 🐸",
+      projections: [
+        { year: 1, cash_kept: 1800, dca_hys_4pct: 1839, dca_market_7pct: 1869, lump_sum_market_7pct: 1926 },
+        { year: 3, cash_kept: 5400, dca_hys_4pct: 5750, dca_market_7pct: 6046, lump_sum_market_7pct: 2205 }, // Lump sum diverts here, logic checked later
+        { year: 5, cash_kept: 9000, dca_hys_4pct: 9950, dca_market_7pct: 10759, lump_sum_market_7pct: 2525 }
+      ]
+    };
+  }
+};

@@ -5,7 +5,7 @@ import { PennyMascot, Progress } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
 import SadPenny from '@/assets/SadPenny.png'
 import SurprisedPenny from '@/assets/SurprisedPenny.png'
-import PomPomPenny from '@/assets/Pom Pom Penny.png'
+import PomPomPenny from '@/assets/PomPomPenny.png'
 
 export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete }) {
     const [quiz, setQuiz] = useState(null)
@@ -17,7 +17,6 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
     const [quizCompleted, setQuizCompleted] = useState(false)
     const [loading, setLoading] = useState(true)
     const [currentMood, setCurrentMood] = useState('thinking')
-    const [reactionImage, setReactionImage] = useState(null)
 
     useEffect(() => {
         fetchQuiz()
@@ -63,17 +62,13 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
         setIsCorrect(correct)
         setShowResult(true)
 
-        setIsCorrect(correct)
-        setShowResult(true)
-
         if (correct) {
             setScore(prev => prev + 1)
-            setCurrentMood('pompom')
+            setCurrentMood('happy')
         } else {
             // Randomly pick sad or surprised for wrong answer
             const isSad = Math.random() > 0.5
             setCurrentMood(isSad ? 'sad' : 'surprised')
-            setReactionImage(isSad ? SadPenny : SurprisedPenny)
         }
     }
 
@@ -223,16 +218,16 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
                             ? (isCorrect ? "🎉 Correct!" : "Not quite, but you're learning! 📚")
                             : "Think carefully! You've got this!"
                         }
-                        size="small"
+                        size={showResult ? "medium" : "small"}
                         mood={currentMood}
                         animate={true}
                     />
-                    {/* Show animated Pom Pom Penny when correct */}
-                    {showResult && isCorrect && (
+                    {/* Show animated reaction image when answer is checked */}
+                    {showResult && (
                         <div className="flex-shrink-0 animate-bounce">
                             <img
-                                src={PomPomPenny}
-                                alt="Pom Pom Penny celebrating"
+                                src={isCorrect ? PomPomPenny : (currentMood === 'sad' ? SadPenny : SurprisedPenny)}
+                                alt="Penny's reaction"
                                 className="w-16 h-16 object-contain drop-shadow-lg"
                             />
                         </div>
