@@ -116,18 +116,13 @@ header {
 }
 
 /* Typography */
-<<<<<<< HEAD
-h1, h2, h3, h4, h5, h6 {
-  @apply font-black text-gray-800 text-center;
-=======
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  @apply font-black text-gray-800;
->>>>>>> 01c369c672a032c2745dfd37d8be73e78067b95d
+  @apply font-black text-gray-800 text-center;
 }
 
 h1 {
@@ -275,7 +270,6 @@ span, label {
   @apply transition-transform duration-200 hover:scale-105;
 }
 
-<<<<<<< HEAD
 /* Icon colors */
 .icon-green {
   @apply text-emerald-500;
@@ -299,7 +293,7 @@ footer {
   padding: 1rem 0;
   color: white;
 }
-=======
+
 /* Quest Completion Animations */
 @keyframes fadeIn {
   from {
@@ -412,4 +406,3 @@ footer {
   opacity: 0;
   animation-fill-mode: forwards;
 }
->>>>>>> 01c369c672a032c2745dfd37d8be73e78067b95d
