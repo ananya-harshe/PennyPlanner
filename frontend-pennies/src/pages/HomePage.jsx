@@ -78,12 +78,12 @@ export default function HomePage() {
       {/* Quick Actions */}
       <div className="w-full">
         <button
-          onClick={() => navigate('/learn')}
+          onClick={() => navigate('/quests')}
           className="w-full card-3d p-6 border-4 border-gray-200 hover:scale-105 transition-transform flex flex-col items-center gap-2"
-          data-testid="continue-learning-btn"
+          data-testid="daily-quests-btn"
         >
           <BookOpen size={32} className="text-emerald-500" />
-          <span className="font-bold text-gray-700 text-sm text-center">Continue Learning</span>
+          <span className="font-bold text-gray-700 text-sm text-center">Daily Quests</span>
           <span className="text-xs text-gray-500">{progress?.completed_lessons?.length || 0} done</span>
         </button>
       </div>

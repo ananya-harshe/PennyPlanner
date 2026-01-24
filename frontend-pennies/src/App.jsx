@@ -6,7 +6,7 @@ import HomePage from '@/pages/HomePage'
 import DashboardPage from '@/pages/DashboardPage'
 import ChatbotPage from '@/pages/ChatbotPage'
 import QuestsPage from '@/pages/QuestsPage'
-import LearningPage from '@/pages/LearningPage'
+
 import SettingsPage from '@/pages/SettingsPage'
 import ShopPage from '@/pages/ShopPage'
 import LoginPage from '@/pages/LoginPage'
@@ -136,7 +136,7 @@ function AppContent() {
                   <Route path="/chatbot" element={<ChatbotPage />} />
                   <Route path="/quests" element={<QuestsPage />} />
                   <Route path="/shop" element={<ShopPage />} />
-                  <Route path="/learn" element={<LearningPage />} />
+
                   <Route path="/settings" element={<SettingsPage />} />
                 </Routes>
               </div>
