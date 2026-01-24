@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import axios from 'axios';
 import { isDbConnected } from '../config/database.js';
 
 const generateToken = (id) => {
@@ -32,11 +33,27 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    const nessieRes = await axios.post(`http://api.nessieisreal.com/customers?key=${process.env.NESSIE}`, {
+      first_name: username, 
+      last_name: "Customer",
+      address: {
+        street_number: "123",
+        street_name: "Main St",
+        city: "New York",
+        state: "NY",
+        zip: "10001"
+      }
+    });
+
+    const nessieId = nessieRes.data.objectCreated._id;
+    console.log(`Nessie id: ${nessieId}`)
+
     // Create user
     user = await User.create({
+      accountID: nessieId,
       username,
       email,
-      password
+      password,
     });
 
     const token = generateToken(user._id);
@@ -46,6 +63,7 @@ export const register = async (req, res) => {
       token,
       user: {
         id: user._id,
+        accountID: user.accountID,
         username: user.username,
         email: user.email,
         xp: user.xp,

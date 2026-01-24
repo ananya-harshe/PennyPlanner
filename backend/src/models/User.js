@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'Loser Club Member'
   },
+  accountID: {
+    type: String,
+  },
   email: {
     type: String,
     required: [true, 'Please provide an email'],

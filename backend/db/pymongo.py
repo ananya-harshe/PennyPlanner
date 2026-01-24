@@ -1,14 +1,33 @@
 from pymongo import MongoClient
+from pymongo.database import Database
 import os
+from typing import Optional
 
-uri = os.getenv("MONGO_SRV")
-database = os.getenv("DATABASE")
-client = MongoClient(uri)
+client: Optional[MongoClient] = None
+database: Optional[Database] = None
 
-try:
-    database = client.get_database(database)
-    
-    client.close()
+def getdatabase() -> Database:
+    global client, database
 
-except Exception as e:
-    raise Exception("Unable to find the document due to the following error: ", e)
+    if database is not None:
+        return database
+
+    uri = os.getenv("MONGO_SRV")
+    database_name = os.getenv("DATABASE")
+
+    if not uri or not database_name:
+        raise ValueError("MONGO_SRV and DATABASE environment variables must be set")
+
+    try:
+        client = MongoClient(uri)
+        database = client.getdatabase(database_name)
+        return database
+    except Exception as e:
+        raise Exception(f"Unable to connect to MongoDB: {e}")
+
+def closedatabase():
+    global client, database
+    if client:
+        client.close()
+        client = None
+        database = None
