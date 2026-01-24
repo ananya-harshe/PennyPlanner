@@ -1,4 +1,5 @@
 import React from 'react'
+import { API_URL, getAuthHeaders } from '@/api/client'
 
 export const PennyMascot = ({ message, size = 'medium', mood = 'happy', showBubble = true, animate = true }) => {
   const sizes = {
@@ -38,7 +39,14 @@ export const PennyTip = ({ onClose }) => {
   React.useEffect(() => {
     const fetchTip = async () => {
       try {
-        // Simulate fetching a tip from API
+        const response = await fetch(`${API_URL}/penny/tip`, {
+          headers: getAuthHeaders()
+        })
+        const data = await response.json()
+        setTip(data.tip || "Try the 24-hour rule before making purchases! 🐸")
+      } catch (e) {
+        console.error('Failed to fetch tip:', e)
+        // Fallback tips if API fails
         const tips = [
           "Try the 24-hour rule before making purchases! 🐸",
           "The 50/30/20 budgeting rule is a great start! 🐸",
@@ -47,8 +55,6 @@ export const PennyTip = ({ onClose }) => {
           "Start with small goals and build from there! 🐸",
         ]
         setTip(tips[Math.floor(Math.random() * tips.length)])
-      } catch (e) {
-        setTip("Try the 24-hour rule before making purchases! 🐸")
       } finally {
         setLoading(false)
       }

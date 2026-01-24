@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Send, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { PennyMascot } from '@/components/PennyComponents'
+import { API_URL, getAuthHeaders } from '@/api/client'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'
@@ -23,8 +24,35 @@ export default function ChatbotPage() {
     scrollToBottom()
   }, [messages])
 
+  useEffect(() => {
+    // Load a greeting message from Penny on page load
+    loadPennyGreeting()
+  }, [])
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const loadPennyGreeting = async () => {
+    try {
+      const response = await fetch(`${API_URL}/penny/message?context=home`, {
+        headers: getAuthHeaders()
+      })
+      const data = await response.json()
+      if (data.message) {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            text: data.message,
+            sender: 'bot',
+            timestamp: new Date(),
+          },
+        ])
+      }
+    } catch (error) {
+      console.error('Failed to load greeting:', error)
+    }
   }
 
   const callGeminiAPI = async (userMessage) => {
@@ -61,7 +89,13 @@ export default function ChatbotPage() {
       }
 
       const data = await response.json()
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response."
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text
+      
+      if (!responseText) {
+        throw new Error('No response text received')
+      }
+      
+      return responseText
     } catch (error) {
       console.error('Gemini API error:', error)
       return "I'm having trouble connecting to my AI brain right now. Try again in a moment!"
@@ -84,15 +118,15 @@ export default function ChatbotPage() {
 
     try {
       const botResponseText = await callGeminiAPI(input)
-      setMessages(prev => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          text: botResponseText,
-          sender: 'bot',
-          timestamp: new Date(),
-        },
-      ])
+      
+      const botMessage = {
+        id: (Date.now() + 1).toString(),
+        text: botResponseText,
+        sender: 'bot',
+        timestamp: new Date(),
+      }
+      
+      setMessages(prev => [...prev, botMessage])
     } catch (error) {
       console.error('Error:', error)
       toast.error('Failed to get response')
@@ -109,7 +143,7 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 pt-24">
+    <div className="min-h-screen bg-gray-50 pb-40 pt-24 flex flex-col">
       <PennyMascot message="Ask me anything about money! 💚" size="medium" animate />
 
       {/* API Key Warning */}
@@ -137,7 +171,7 @@ export default function ChatbotPage() {
                   : 'bg-gray-200 text-gray-800 rounded-bl-none border-2 border-gray-300'
               }`}
             >
-              <p className="text-sm">{message.text}</p>
+              <p className="text-sm whitespace-wrap break-words">{message.text}</p>
               <p
                 className={`text-xs mt-1 font-bold ${
                   message.sender === 'user' ? 'text-emerald-100' : 'text-gray-600'

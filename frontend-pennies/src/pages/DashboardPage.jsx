@@ -4,8 +4,7 @@ import { toast } from 'sonner'
 import axios from 'axios'
 import { theme } from '@/theme'
 import { PennyMascot, Progress } from '@/components/PennyComponents'
-
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api'
+import { API_URL, getAuthHeaders } from '@/api/client'
 
 export default function DashboardPage() {
   const [transactions, setTransactions] = useState(null)
@@ -15,7 +14,14 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Mock transaction data
+        // Fetch Penny message
+        const messageResponse = await fetch(`${API_URL}/penny/message?context=home`, {
+          headers: getAuthHeaders()
+        })
+        const messageData = await messageResponse.json()
+        setPennyMessage(messageData.message || "Your finances are looking great! Keep it up! 🐸")
+
+        // Mock transaction data for now (since we don't have a transactions API endpoint yet)
         const mockTransactions = [
           { id: '1', category: 'Groceries', amount: 125.50, date: '2026-01-23', type: 'expense' },
           { id: '2', category: 'Salary', amount: 3500, date: '2026-01-20', type: 'income' },
@@ -53,8 +59,6 @@ export default function DashboardPage() {
           balance,
           categorySpending
         })
-
-        setPennyMessage("Your finances are looking great! Keep it up! 🐸")
       } catch (e) {
         console.error("Failed to fetch data", e)
         toast.error("Failed to load dashboard")

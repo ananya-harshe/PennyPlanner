@@ -5,8 +5,7 @@ import { toast } from 'sonner'
 import axios from 'axios'
 import { theme } from '@/theme'
 import { PennyMascot, PennyTip, Progress } from '@/components/PennyComponents'
-
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api'
+import { API_URL, getAuthHeaders } from '@/api/client'
 
 export default function HomePage() {
   const navigate = useNavigate()

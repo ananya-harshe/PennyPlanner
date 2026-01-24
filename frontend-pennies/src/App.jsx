@@ -2,18 +2,21 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { Toaster } from 'sonner'
-import { Home, BookOpen, Trophy, User, Wallet } from 'lucide-react'
+import { Home, BookOpen, Trophy, User, Wallet, LogOut } from 'lucide-react'
+import { AuthProvider, useAuth } from '@/store/authContext'
 import HomePage from '@/pages/HomePage'
 import DashboardPage from '@/pages/DashboardPage'
 import ChatbotPage from '@/pages/ChatbotPage'
 import QuestsPage from '@/pages/QuestsPage'
+import LoginPage from '@/pages/LoginPage'
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api'
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api'
 
 // Navigation Component
 const BottomNav = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const { logout, user } = useAuth()
   
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
@@ -24,7 +27,7 @@ const BottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-4 border-gray-200 z-50">
-      <div className="max-w-4xl mx-auto px-4 flex justify-around">
+      <div className="max-w-4xl mx-auto px-4 flex justify-around items-center">
         {navItems.map((item) => (
           <button
             key={item.path}
@@ -39,6 +42,18 @@ const BottomNav = () => {
             <span className="text-xs font-semibold">{item.label}</span>
           </button>
         ))}
+        {/* Logout Button */}
+        <button
+          onClick={() => {
+            logout()
+            navigate('/login')
+          }}
+          title={`Logout (${user?.username})`}
+          className="flex-1 py-4 flex flex-col items-center gap-1 text-gray-600 hover:text-red-500 transition-colors"
+        >
+          <LogOut size={24} />
+          <span className="text-xs font-semibold">Logout</span>
+        </button>
       </div>
     </nav>
   )
@@ -61,6 +76,40 @@ const StatsHeader = () => {
 }
 
 export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  )
+}
+
+function AppContent() {
+  const { isAuthenticated, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-emerald-50">
+        <div className="text-center">
+          <div className="text-4xl mb-4">💰</div>
+          <p className="text-xl font-semibold text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="app-container bg-gray-100">
+        <Toaster position="top-center" richColors />
+        <BrowserRouter>
+          <Routes>
+            <Route path="*" element={<LoginPage />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
+    )
+  }
+
   return (
     <div className="app-container bg-gray-100 min-h-screen">
       <BrowserRouter>
