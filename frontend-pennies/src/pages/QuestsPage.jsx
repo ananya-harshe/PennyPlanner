@@ -97,8 +97,8 @@ const QuestQuizModal = ({ quest, onClose, onComplete }) => {
               onClick={() => !submitted && setSelectedOption(idx)}
               disabled={submitted}
               className={`w-full p-3 rounded-xl text-left text-sm font-semibold border-2 transition-all
-                        ${submitted && idx === currentQuestion.correct_answer ? 'bg-green-100 border-green-500 text-green-700' : ''}
-                        ${submitted && idx === selectedOption && idx !== currentQuestion.correct_answer ? 'bg-red-100 border-red-500 text-red-700' : ''}
+                        ${submitted && isCorrect && idx === currentQuestion.correct_answer ? 'bg-green-100 border-green-500 text-green-700' : ''}
+                        ${submitted && !isCorrect && idx === selectedOption ? 'bg-red-100 border-red-500 text-red-700' : ''}
                         ${!submitted && selectedOption === idx ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-gray-200 hover:border-indigo-300'}
                     `}
             >
@@ -113,7 +113,7 @@ const QuestQuizModal = ({ quest, onClose, onComplete }) => {
           </div>
         )}
 
-        {submitted && !isCorrect && (
+        {submitted && isCorrect && (
           <div className="text-xs text-gray-500 mb-4 p-3 bg-gray-50 rounded-xl">
             <span className="font-bold">Explanation:</span> {currentQuestion.explanation}
           </div>
@@ -157,7 +157,7 @@ const QuestQuizModal = ({ quest, onClose, onComplete }) => {
 import { useAuth } from '@/store/authContext'
 
 export default function QuestsPage() {
-  const { questsData, setQuestsData } = useAuth()
+  const { questsData, setQuestsData, refreshUser } = useAuth()
 
   // Initialize state from cache if available
   const [quests, setQuests] = useState(questsData?.quests || [])
@@ -255,6 +255,9 @@ export default function QuestsPage() {
     if (updatedQuests.length === 0) {
       fetchQuests()
     }
+
+    // Sync XP with global user state (Sidebar)
+    refreshUser();
   }
 
   if (loading) {

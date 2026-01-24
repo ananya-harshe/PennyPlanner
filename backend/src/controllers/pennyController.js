@@ -1,4 +1,4 @@
-import { generatePennyTip, generatePennyMessage, chatWithPenny } from '../services/geminiService.js';
+import { generatePennyTip, generatePennyMessage, chatWithPenny, generateSpendingInsights } from '../services/geminiService.js';
 import Transaction from '../models/Transaction.js';
 
 export const getPennyTip = async (req, res) => {
@@ -49,6 +49,26 @@ export const chatWithPennyController = async (req, res) => {
     res.json({ response });
   } catch (error) {
     console.error('Chat error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getPennyInsights = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    let transactions = [];
+
+    if (userId) {
+      // Fetch more history for better context
+      transactions = await Transaction.find({ user_id: userId })
+        .sort({ date: -1 })
+        .limit(10);
+    }
+
+    const insight = await generateSpendingInsights(transactions);
+    res.json({ insight });
+  } catch (error) {
+    console.error('Insights error:', error);
     res.status(500).json({ message: error.message });
   }
 };

@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const { dashboardData, setDashboardData } = useAuth()
   const [data, setData] = useState(null)
   const [pennyMessage, setPennyMessage] = useState(null)
+  const [pennyAdvice, setPennyAdvice] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function DashboardPage() {
         console.log("⚡ Using cached dashboard data")
         setData(dashboardData.analysis)
         setPennyMessage(dashboardData.message)
+        setPennyAdvice(dashboardData.advice)
         setLoading(false)
         return
       }
@@ -31,21 +33,25 @@ export default function DashboardPage() {
         setLoading(true)
 
         // Parallel Fetching for Speed Optimization
-        const [analysisResponse, messageResponse] = await Promise.all([
+        const [analysisResponse, messageResponse, adviceResponse] = await Promise.all([
           fetch(`${API_URL}/transactions/analysis`, { headers: getAuthHeaders() }),
-          fetch(`${API_URL}/penny/message?context=home`, { headers: getAuthHeaders() })
+          fetch(`${API_URL}/penny/message?context=home`, { headers: getAuthHeaders() }),
+          fetch(`${API_URL}/penny/insights`, { headers: getAuthHeaders() })
         ]);
 
         const analysisData = await analysisResponse.json()
         const messageData = await messageResponse.json()
+        const adviceData = await adviceResponse.json()
 
         setData(analysisData)
         setPennyMessage(messageData.message)
+        setPennyAdvice(adviceData.insight)
 
         // Cache the data in context
         setDashboardData({
           analysis: analysisData,
-          message: messageData.message
+          message: messageData.message,
+          advice: adviceData.insight
         })
 
       } catch (e) {
@@ -156,6 +162,23 @@ export default function DashboardPage() {
           </div>
           <p className="text-3xl font-black text-red-500">${data?.total?.toFixed(2) || '0.00'}</p>
           <p className="text-sm font-bold text-gray-600 mt-2">This month</p>
+        </div>
+      </div>
+
+      {/* Penny's Advice */}
+      <div className="card-3d p-6 border-4 border-indigo-200 mb-6 bg-indigo-50/50">
+        <div className="flex items-start gap-4">
+          <div className="bg-indigo-500 rounded-full p-3 flex-shrink-0 animate-bounce-slow">
+            <span className="text-3xl">🐸</span>
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-indigo-900 mb-1">Penny's Advice</h3>
+            {loading ? (
+              <p className="text-indigo-400 font-bold animate-pulse text-sm">Reviewing your transactions...</p>
+            ) : (
+              <p className="text-indigo-700 font-bold text-sm italic">"{pennyAdvice || "Keep up the great work! Your financial future looks bright! ✨"}"</p>
+            )}
+          </div>
         </div>
       </div>
 

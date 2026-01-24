@@ -1,5 +1,5 @@
 import React from 'react'
-import { Gem, Star, Flame } from 'lucide-react'
+import { Star, Flame } from 'lucide-react'
 import { PennyMascot } from './PennyComponents'
 
 export default function StatsSidebar({ user }) {
@@ -8,16 +8,6 @@ export default function StatsSidebar({ user }) {
             {/* Stats Section */}
             <div className="space-y-4">
                 <h2 className="text-xl font-black text-gray-800 mb-6">Your Stats</h2>
-
-                <div className="card-3d p-4 border-4 border-emerald-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-emerald-100 p-2 rounded-xl">
-                            <Gem className="w-6 h-6 text-emerald-500 fill-emerald-500" />
-                        </div>
-                        <span className="font-black text-gray-700">Gems</span>
-                    </div>
-                    <span className="text-2xl font-black text-emerald-500">{user?.gems || 0}</span>
-                </div>
 
                 <div className="card-3d p-4 border-4 border-indigo-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -28,6 +18,8 @@ export default function StatsSidebar({ user }) {
                     </div>
                     <span className="text-2xl font-black text-indigo-500">{user?.xp || 0}</span>
                 </div>
+
+
 
                 <div className="card-3d p-4 border-4 border-orange-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">

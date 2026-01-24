@@ -20,7 +20,7 @@ export default function DesktopNavigation() {
                 <div className="bg-emerald-500 rounded-2xl p-2">
                     <Wallet className="w-8 h-8 text-white" />
                 </div>
-                <h1 className="text-2xl font-black text-gray-800">PennyPlanning</h1>
+                <h1 className="text-2xl font-black text-gray-800">PennyWise</h1>
             </div>
 
             <nav className="flex-1 space-y-2">

@@ -47,7 +47,13 @@ export const register = async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        xp: user.xp,
+        streak: user.streak,
+        daily_xp: user.daily_xp,
+        daily_goal: user.daily_goal,
+        badges: user.badges,
+        hearts: user.hearts
       }
     });
   } catch (error) {
@@ -85,7 +91,42 @@ export const login = async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        xp: user.xp,
+        streak: user.streak,
+        daily_xp: user.daily_xp,
+        daily_goal: user.daily_goal,
+        badges: user.badges,
+        hearts: user.hearts
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getMe = async (req, res) => {
+  try {
+    if (!checkDatabaseConnection(req, res)) return;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        xp: user.xp,
+        streak: user.streak,
+        daily_xp: user.daily_xp,
+        daily_goal: user.daily_goal,
+        badges: user.badges,
+        hearts: user.hearts
       }
     });
   } catch (error) {
