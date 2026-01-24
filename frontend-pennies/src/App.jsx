@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import { Home, BookOpen, Trophy, User, Wallet, LogOut, Settings, ShoppingBag, Sparkles } from 'lucide-react'
 import { AuthProvider, useAuth } from '@/store/authContext'
 import Penny from '@/assets/Penny.png'
+import AppIcon from '@/assets/AppIcon.png'
 import HomePage from '@/pages/HomePage'
 import DashboardPage from '@/pages/DashboardPage'
 import ChatbotPage from '@/pages/ChatbotPage'
@@ -64,9 +65,7 @@ const StatsHeader = ({ onOpenChat }) => {
     <header className="bg-white border-b-4 border-gray-200 sticky top-0 z-40 lg:hidden">
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="bg-emerald-500 rounded-2xl p-2">
-            <Wallet className="w-6 h-6 text-white" />
-          </div>
+          <img src={AppIcon} alt="PennyWise" className="w-10 h-10 rounded-2xl" />
           <h1 className="text-2xl font-black text-gray-800">PennyWise</h1>
         </div>
 
