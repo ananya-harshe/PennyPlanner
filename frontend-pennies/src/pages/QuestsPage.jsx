@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { PennyMascot } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
 import QuestCompletionAnimation from '@/components/QuestCompletionAnimation'
+import GiftBoxAnimation from '@/components/GiftBoxAnimation'
 
 // Multi-step Quiz Modal for Quest
 const QuestQuizModal = ({ quest, onClose, onComplete }) => {
@@ -168,6 +169,8 @@ export default function QuestsPage() {
   const [totalXP, setTotalXP] = useState(questsData?.totalXP || 0)
   const [showAnimation, setShowAnimation] = useState(false)
   const [gainedXP, setGainedXP] = useState(0)
+  const [showGiftBox, setShowGiftBox] = useState(false)
+  const [pendingGift, setPendingGift] = useState(false)
 
   useEffect(() => {
     // Determine if we need to fetch new data
@@ -191,9 +194,7 @@ export default function QuestsPage() {
       const questsDataNew = await questsResponse.json()
       const progressData = await progressResponse.json()
 
-      // Process Quests - only update if different or empty? 
-      // Actually backend generates on GET usually? 
-      // If we just got them, set them.
+      // Process Quests 
       setQuests(questsDataNew)
       setTotalXP(progressData.xp || 0)
 
@@ -229,7 +230,17 @@ export default function QuestsPage() {
   }
 
   const handleQuestComplete = (result) => {
-    // toast.success(`Quest Complete! +${result.xp_earned} XP`)
+    // Check if we crossed a 500 XP threshold
+    // Old XP is `totalXP` (before update)
+    // New XP is `totalXP + result.xp_earned`
+    const oldXP = totalXP
+    const newXP = totalXP + result.xp_earned
+
+    // Check if the floor(xp/500) changed
+    if (Math.floor(newXP / 500) > Math.floor(oldXP / 500)) {
+      setPendingGift(true)
+    }
+
     setActiveQuest(null)
     setGainedXP(result.xp_earned)
     setShowAnimation(true)
@@ -249,20 +260,34 @@ export default function QuestsPage() {
       totalXP: newTotalXP
     }))
 
-    // Trigger regeneration ONLY if NO quests left
-    // MOVED: Now handled in handleAnimationComplete so we don't show loading spinner over the animation
-    /*
-    if (updatedQuests.length === 0) {
-      fetchQuests()
-    }
-    */
-
     // Sync XP with global user state (Sidebar)
     refreshUser();
   }
 
   const handleAnimationComplete = () => {
     setShowAnimation(false)
+
+    // If we have a pending gift, show it now
+    if (pendingGift) {
+      setShowGiftBox(true)
+      setPendingGift(false)
+      return // Don't fetch quests yet, wait for gift box
+    }
+
+    // Use regular flow if no gift
+    checkAndLoadQuests()
+  }
+
+  const handleGiftBoxComplete = (reward) => {
+    setShowGiftBox(false)
+    // If reward gives XP, we might update totalXP visually, 
+    // but for now let's just proceed. The user gets the feeling of reward.
+
+    // Load quests if needed
+    checkAndLoadQuests()
+  }
+
+  const checkAndLoadQuests = () => {
     // If we have no quests left (meaning we just completed the last one), generate more now
     if (quests.length === 0) {
       fetchQuests();
@@ -409,11 +434,18 @@ export default function QuestsPage() {
         )}
       </div>
 
-      {/* Animation Overlay */}
+      {/* XP Animation Overlay */}
       {showAnimation && (
         <QuestCompletionAnimation
           xpGained={gainedXP}
           onComplete={handleAnimationComplete}
+        />
+      )}
+
+      {/* Gift Box Overlay */}
+      {showGiftBox && (
+        <GiftBoxAnimation
+          onComplete={handleGiftBoxComplete}
         />
       )}
     </div>
