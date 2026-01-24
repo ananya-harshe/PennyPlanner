@@ -22,8 +22,24 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+origin: (origin, callback) => {
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://penny-three.vercel.app', // Your Vercel App
+    process.env.FRONTEND_URL
+  ];
+
+  // Allow requests with no origin (like mobile apps or curl requests)
+  if (!origin) return callback(null, true);
+
+  if (allowedOrigins.includes(origin)) {
+    callback(null, true);
+  } else {
+    console.log('Blocked by CORS. Origin:', origin);
+    callback(new Error('Not allowed by CORS'));
+  }
+},
   credentials: true
 }));
 app.use(morgan('dev'));
