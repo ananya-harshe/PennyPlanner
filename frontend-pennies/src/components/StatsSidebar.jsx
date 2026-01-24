@@ -1,6 +1,7 @@
 import React from 'react'
 import { Star, Flame } from 'lucide-react'
 import { PennyMascot } from './PennyComponents'
+import Penny from '@/assets/Penny.png'
 
 export default function StatsSidebar({ user, onOpenChat }) {
     return (
@@ -37,8 +38,8 @@ export default function StatsSidebar({ user, onOpenChat }) {
                     className="w-full card-3d p-4 bg-gradient-to-r from-emerald-500 to-emerald-600 border-b-4 border-emerald-800 rounded-2xl flex items-center justify-between group hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                 >
                     <div className="flex items-center gap-3">
-                        <div className="bg-white/20 p-2 rounded-xl text-2xl group-hover:rotate-12 transition-transform">
-                            🐸
+                        <div className="w-10 h-10 bg-white/20 p-1 rounded-xl group-hover:rotate-12 transition-transform overflow-hidden border border-white/50">
+                            <img src={Penny} alt="Penny" className="w-full h-full object-cover rounded-lg" />
                         </div>
                         <div className="text-left">
                             <span className="block font-black text-white">Ask Penny</span>

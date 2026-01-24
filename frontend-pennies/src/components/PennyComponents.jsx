@@ -1,5 +1,6 @@
 import React from 'react'
 import { API_URL, getAuthHeaders } from '@/api/client'
+import Penny from '@/assets/Penny.png'
 
 export const PennyMascot = ({ message, size = 'medium', mood = 'happy', showBubble = true, animate = true }) => {
   const sizes = {
@@ -18,8 +19,8 @@ export const PennyMascot = ({ message, size = 'medium', mood = 'happy', showBubb
 
   return (
     <div className={`flex items-start gap-3 ${animate ? 'animate-slide-up' : ''}`} data-testid="penny-mascot">
-      <div className={`${sizes[size]} rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg flex-shrink-0 ${animate ? 'animate-float' : ''}`}>
-        <span>{moods[mood]}</span>
+      <div className={`${sizes[size]} rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg flex-shrink-0 ${animate ? 'animate-float' : ''} overflow-hidden border-2 border-white`}>
+        <img src={Penny} alt="Penny the Frog" className="w-full h-full object-cover" />
       </div>
       {showBubble && message && (
         <div className="speech-bubble flex-1 bg-green-50 border-2 border-green-200 rounded-2xl p-3">
@@ -48,11 +49,11 @@ export const PennyTip = ({ onClose }) => {
         console.error('Failed to fetch tip:', e)
         // Fallback tips if API fails
         const tips = [
-          "Try the 24-hour rule before making purchases! 🐸",
-          "The 50/30/20 budgeting rule is a great start! 🐸",
-          "Automate your savings for consistent growth! 🐸",
-          "Track every penny to understand your spending! 🐸",
-          "Start with small goals and build from there! 🐸",
+          "Try the 24-hour rule before making purchases!",
+          "The 50/30/20 budgeting rule is a great start!",
+          "Automate your savings for consistent growth!",
+          "Track every penny to understand your spending!",
+          "Start with small goals and build from there!",
         ]
         setTip(tips[Math.floor(Math.random() * tips.length)])
       } finally {
@@ -67,8 +68,8 @@ export const PennyTip = ({ onClose }) => {
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-3xl p-6 max-w-sm w-full animate-bounce-in">
           <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-4xl animate-pulse">
-              🐸
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-4xl animate-pulse overflow-hidden border-4 border-white">
+              <img src={Penny} alt="Penny" className="w-full h-full object-cover" />
             </div>
           </div>
           <p className="text-center text-gray-500">Penny is thinking...</p>
@@ -81,8 +82,8 @@ export const PennyTip = ({ onClose }) => {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-white rounded-3xl p-6 max-w-sm w-full animate-bounce-in" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center mb-4">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-4xl animate-float">
-            🐸
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-4xl animate-float overflow-hidden border-4 border-white">
+            <img src={Penny} alt="Penny" className="w-full h-full object-cover" />
           </div>
         </div>
         <h3 className="text-xl font-extrabold text-center text-gray-800 mb-3">
@@ -91,7 +92,7 @@ export const PennyTip = ({ onClose }) => {
         <p className="text-gray-600 text-center mb-6">
           {tip}
         </p>
-        <button 
+        <button
           onClick={onClose}
           className="w-full py-3 bg-emerald-500 text-white font-black rounded-2xl px-6 border-b-4 border-emerald-700 hover:bg-emerald-600 active:translate-y-1 active:border-b-2 transition-all"
           data-testid="close-penny-tip"
@@ -106,7 +107,7 @@ export const PennyTip = ({ onClose }) => {
 export const Progress = ({ value, className = '' }) => {
   return (
     <div className={`w-full bg-gray-200 rounded-full h-2 overflow-hidden ${className}`}>
-      <div 
+      <div
         className="h-full bg-emerald-500 rounded-full transition-all duration-500"
         style={{ width: `${Math.min(value, 100)}%` }}
       />

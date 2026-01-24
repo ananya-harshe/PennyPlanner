@@ -8,6 +8,7 @@ import { PennyMascot, Progress } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
 import { useAuth } from '@/store/authContext'
 import AddGoalModal from '@/components/AddGoalModal'
+import Penny from '@/assets/Penny.png'
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
 
@@ -83,7 +84,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
-        <p className="text-gray-500 font-bold animate-pulse">Penny is analyzing your habits... 🐸</p>
+        <p className="text-gray-500 font-bold animate-pulse">Penny is analyzing your habits...</p>
       </div>
     )
   }
@@ -243,8 +244,8 @@ export default function DashboardPage() {
       {/* Penny's Advice */}
       <div className="card-3d p-6 border-4 border-indigo-200 mb-6 bg-indigo-50/50">
         <div className="flex items-start gap-4">
-          <div className="bg-indigo-500 rounded-full p-3 flex-shrink-0 animate-bounce-slow">
-            <span className="text-3xl">🐸</span>
+          <div className="bg-indigo-500 w-16 h-16 rounded-full p-1 flex-shrink-0 animate-bounce-slow overflow-hidden border-2 border-white flex items-center justify-center">
+            <img src={Penny} alt="Penny" className="w-full h-full object-cover rounded-full" />
           </div>
           <div>
             <h3 className="text-lg font-black text-indigo-900 mb-1">Penny's Advice</h3>

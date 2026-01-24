@@ -297,7 +297,7 @@ export default function QuestsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen pt-24 pb-24 gap-4">
         <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-500 font-bold animate-pulse">Generating your financial challenges... 🐸</p>
+        <p className="text-gray-500 font-bold animate-pulse">Generating your financial challenges...</p>
       </div>
     )
   }

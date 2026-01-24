@@ -204,7 +204,7 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
                 <PennyMascot
                     message={showResult
                         ? (isCorrect ? "Ribbit! That's right! 🎉" : "Not quite, but you're learning! 📚")
-                        : "Think carefully! You've got this! 🐸"
+                        : "Think carefully! You've got this!"
                     }
                     size="small"
                     mood={showResult ? (isCorrect ? 'happy' : 'thinking') : 'thinking'}
