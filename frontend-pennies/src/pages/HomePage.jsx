@@ -8,6 +8,7 @@ import { PennyMascot, PennyTip, Progress } from '@/components/PennyComponents'
 import StreakAnimation from '@/components/StreakAnimation'
 import { API_URL, getAuthHeaders } from '@/api/client'
 import Penny from '@/assets/Penny.png'
+import TalkingPenny from '@/assets/TalkingPenny.png'
 
 import { useAuth } from '@/store/authContext'
 
@@ -131,7 +132,7 @@ export default function HomePage() {
           <PennyMascot
             message={pennyMessage || "Hey there! Ready to become a money master!"}
             size="medium"
-            mood="happy"
+            mood="thinking"
           />
 
           {/* Daily Goal Progress */}
@@ -199,7 +200,7 @@ export default function HomePage() {
             data-testid="ask-penny-btn"
           >
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-xl overflow-hidden border-2 border-white">
-              <img src={Penny} alt="Penny" className="w-full h-full object-cover" />
+              <img src={TalkingPenny} alt="Penny" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 text-left">
               <span className="font-bold text-gray-700 block text-left">Ask Penny for a Tip</span>

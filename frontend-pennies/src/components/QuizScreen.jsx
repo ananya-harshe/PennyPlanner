@@ -3,6 +3,9 @@ import { X, ChevronRight, CheckCircle, XCircle, Star, Trophy, ArrowLeft } from '
 import { toast } from 'sonner'
 import { PennyMascot, Progress } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
+import SadPenny from '@/assets/SadPenny.png'
+import SurprisedPenny from '@/assets/SurprisedPenny.png'
+import PomPomPenny from '@/assets/Pom Pom Penny.png'
 
 export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete }) {
     const [quiz, setQuiz] = useState(null)
@@ -13,6 +16,8 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
     const [score, setScore] = useState(0)
     const [quizCompleted, setQuizCompleted] = useState(false)
     const [loading, setLoading] = useState(true)
+    const [currentMood, setCurrentMood] = useState('thinking')
+    const [reactionImage, setReactionImage] = useState(null)
 
     useEffect(() => {
         fetchQuiz()
@@ -43,6 +48,7 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
     const handleSelectAnswer = (index) => {
         if (showResult) return
         setSelectedAnswer(index)
+        setCurrentMood('thinking')
     }
 
     const handleSubmitAnswer = () => {
@@ -57,8 +63,17 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
         setIsCorrect(correct)
         setShowResult(true)
 
+        setIsCorrect(correct)
+        setShowResult(true)
+
         if (correct) {
             setScore(prev => prev + 1)
+            setCurrentMood('pompom')
+        } else {
+            // Randomly pick sad or surprised for wrong answer
+            const isSad = Math.random() > 0.5
+            setCurrentMood(isSad ? 'sad' : 'surprised')
+            setReactionImage(isSad ? SadPenny : SurprisedPenny)
         }
     }
 
@@ -68,6 +83,7 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
             setSelectedAnswer(null)
             setShowResult(false)
             setIsCorrect(false)
+            setCurrentMood('thinking')
         } else {
             completeQuiz()
         }
@@ -201,14 +217,27 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
 
             {/* Question Content */}
             <div className="flex-1 overflow-y-auto p-6">
-                <PennyMascot
-                    message={showResult
-                        ? (isCorrect ? "Ribbit! That's right! 🎉" : "Not quite, but you're learning! 📚")
-                        : "Think carefully! You've got this!"
-                    }
-                    size="small"
-                    mood={showResult ? (isCorrect ? 'happy' : 'thinking') : 'thinking'}
-                />
+                <div className="flex items-start gap-3">
+                    <PennyMascot
+                        message={showResult
+                            ? (isCorrect ? "🎉 Correct!" : "Not quite, but you're learning! 📚")
+                            : "Think carefully! You've got this!"
+                        }
+                        size="small"
+                        mood={currentMood}
+                        animate={true}
+                    />
+                    {/* Show animated Pom Pom Penny when correct */}
+                    {showResult && isCorrect && (
+                        <div className="flex-shrink-0 animate-bounce">
+                            <img
+                                src={PomPomPenny}
+                                alt="Pom Pom Penny celebrating"
+                                className="w-16 h-16 object-contain drop-shadow-lg"
+                            />
+                        </div>
+                    )}
+                </div>
 
                 <div className="mt-6">
                     <h2 className="text-xl font-black text-gray-800 mb-6">
