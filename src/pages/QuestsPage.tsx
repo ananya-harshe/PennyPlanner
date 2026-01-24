@@ -98,7 +98,7 @@ export default function QuestsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen">
       {/* Navigation */}
       <nav className="bg-white sticky top-0 z-50 border-b-4 border-gray-200 shadow-lg">
         <div className={`${theme.spacing.container} py-4 flex justify-between items-center`}>

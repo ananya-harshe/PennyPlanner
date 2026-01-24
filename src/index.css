@@ -1,25 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Macondo&display=swap');
 @import "tailwindcss";
+
+/* @utility corner-scoop {
+  corner-shape: scoop;
+} */
+
+.macondo-regular {
+  font-family: "Macondo", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
 
 * {
   @apply antialiased;
-  font-family: 'Nunito', system-ui, sans-serif;
+ font-family: "Macondo", cursive;
+ text-decoration: none;
 }
 
 html {
-  font-family: 'Nunito', system-ui, sans-serif;
+  font-family: "Macondo", cursive;
 }
 
 html,
-body {
-  @apply m-0 p-0 w-full h-full bg-blue-100;
+body {  background-image: url('assets/skyblue.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  @apply m-0 p-0 w-full h-full;
+}
+
+header {
+  background-image: url('assets/cloud.png');
+  background-size: cover;
+  padding: 1rem 0;
 }
 
 /* Global background */
-body {
-  @apply bg-gradient-to-b from-gray-50 to-gray-100;
-}
+/* body {
+  background-color: transparent;
+} */
 
 /* Duolingo 3D Button Effect */
 .btn-3d {
@@ -53,7 +71,14 @@ body {
 
 /* Cards with rounded Duolingo style */
 .card-3d {
-  @apply rounded-[32px] bg-white shadow-lg border-2 border-gray-200 overflow-hidden;
+  @apply rounded-[32px] bg-pink-100 shadow-lg border-2 border-pink-200 overflow-hidden;
+  mask-image: radial-gradient(32px at 0 0, #0000 98%, #000 101%),
+              radial-gradient(32px at 100% 0, #0000 98%, #000 101%),
+              radial-gradient(32px at 0 100%, #0000 98%, #000 101%),
+              radial-gradient(32px at 100% 100%, #0000 98%, #000 101%);
+  mask-composite: intersect;
+  -webkit-mask-composite: destination-in; /* Support for older webkit */
+
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
@@ -155,7 +180,7 @@ p {
 
 /* Stats pill styling */
 .stat-pill {
-  @apply inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-gray-300 font-bold text-gray-800;
+  @apply inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full border-2 border-gray-300 font-bold text-gray-800;
 }
 
 /* Progress bar Duolingo style */
@@ -208,3 +233,9 @@ p {
   @apply text-orange-500;
 }
 
+footer {
+  background-image: url('assets/grassbottom.jpg');
+  background-size: cover;
+  padding: 1rem 0;
+  color: white;
+}
