@@ -19,9 +19,7 @@ export default function DesktopNavigation() {
     return (
         <aside className="hidden lg:flex flex-col w-72 h-screen fixed top-0 left-0 border-r-4 border-gray-200 bg-white p-6 z-50">
             <div className="flex items-center gap-3 mb-10 px-2">
-                <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-sm">
-                    <img src={AppIcon} alt="PennyWise" className="w-full h-full object-cover" />
-                </div>
+                <img src={AppIcon} alt="PennyWise" className="w-12 h-12 rounded-2xl" />
                 <h1 className="text-2xl font-black text-gray-800">PennyWise</h1>
             </div>
 

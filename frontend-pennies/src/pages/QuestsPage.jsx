@@ -76,6 +76,29 @@ const QuestQuizModal = ({ quest, onClose, onComplete }) => {
     }
   }
 
+  const handleSkipToEnd = async () => {
+    // Skip to the end and mark all remaining questions as correct
+    // Close modal first
+    onClose();
+
+    try {
+      // Complete the quest directly
+      const response = await fetch(`${API_URL}/quests/${quest._id}/complete`, {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+      })
+      const result = await response.json()
+
+      if (result.success) {
+        onComplete(result)
+      } else {
+        toast.error(result.message)
+      }
+    } catch (e) {
+      toast.error("Failed to complete quest")
+    }
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-white rounded-3xl p-6 max-w-md w-full animate-bounce-in" onClick={e => e.stopPropagation()}>
@@ -140,13 +163,21 @@ const QuestQuizModal = ({ quest, onClose, onComplete }) => {
 
         {/* Action Buttons */}
         {!submitted ? (
-          <button
-            onClick={handleCheckAnswer}
-            disabled={selectedOption === null}
-            className="w-full py-3 bg-emerald-500 text-white font-black rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors"
-          >
-            Check Answer
-          </button>
+          <>
+            <button
+              onClick={handleCheckAnswer}
+              disabled={selectedOption === null}
+              className="w-full py-3 bg-emerald-500 text-white font-black rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors"
+            >
+              Check Answer
+            </button>
+            <button
+              onClick={handleSkipToEnd}
+              className="w-full mt-2 py-2 bg-purple-500 text-white font-bold rounded-xl hover:bg-purple-600 transition-colors text-sm"
+            >
+              Demo: Skip to End
+            </button>
+          </>
         ) : (
           isCorrect ? (
             <button
