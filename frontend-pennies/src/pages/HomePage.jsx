@@ -7,6 +7,8 @@ import { theme } from '@/theme'
 import { PennyMascot, PennyTip, Progress } from '@/components/PennyComponents'
 import StreakAnimation from '@/components/StreakAnimation'
 import { API_URL, getAuthHeaders } from '@/api/client'
+import Penny from '@/assets/Penny.png'
+import TalkingPenny from '@/assets/TalkingPenny.png'
 
 import { useAuth } from '@/store/authContext'
 
@@ -52,13 +54,13 @@ export default function HomePage() {
           // Update State
           setProgress(progressData)
           setTransactions({ analysis: analysisData.stats })
-          setPennyMessage("Hop to it! Ready to become a money master? 🐸")
+          setPennyMessage("Hop to it! Ready to become a money master!")
 
           // Update Cache
           setHomeData({
             progress: progressData,
             transactions: { analysis: analysisData.stats },
-            message: "Hop to it! Ready to become a money master? 🐸"
+            message: "Hop to it! Ready to become a money master!"
           })
 
           // Animation Logic (Fresh Fetch Only usually, or check every time? 
@@ -67,7 +69,7 @@ export default function HomePage() {
           // We should check flag regardless of cache source.
         } catch (e) {
           console.error("Failed to fetch data", e)
-          setPennyMessage("Hop to it! Ready to become a money master? 🐸")
+          setPennyMessage("Hop to it! Ready to become a money master!")
         } finally {
           setLoading(false)
         }
@@ -128,9 +130,9 @@ export default function HomePage() {
         <>
           {/* Penny Welcome */}
           <PennyMascot
-            message={pennyMessage || "Hey there! Ready to become a money master? 🐸"}
+            message={pennyMessage || "Hey there! Ready to become a money master!"}
             size="medium"
-            mood="happy"
+            mood="thinking"
           />
 
           {/* Daily Goal Progress */}
@@ -197,8 +199,8 @@ export default function HomePage() {
             className="w-full card-3d p-4 border-4 border-gray-200 hover:scale-105 transition-transform flex items-center gap-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
             data-testid="ask-penny-btn"
           >
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-xl">
-              🐸
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-xl overflow-hidden border-2 border-white">
+              <img src={TalkingPenny} alt="Penny" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 text-left">
               <span className="font-bold text-gray-700 block text-left">Ask Penny for a Tip</span>

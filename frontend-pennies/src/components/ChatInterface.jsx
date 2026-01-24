@@ -3,12 +3,14 @@ import { Send, Sparkles, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { PennyMascot } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
+import Penny from '@/assets/Penny.png'
+import ScholarlyPenny from '@/assets/ScholarlyPenny.png'
 
 export default function ChatInterface({ isModal = false, onClose }) {
     const [messages, setMessages] = useState([
         {
             id: '1',
-            text: "Hi! I'm Penny, your financial advisor frog! 🐸 Ask me anything about budgeting, saving, investing, or managing debt!",
+            text: "Hi! I'm Penny, your financial advisor frog! Ask me anything about budgeting, saving, investing, or managing debt!",
             sender: 'bot',
             timestamp: new Date(),
         },
@@ -38,13 +40,13 @@ export default function ChatInterface({ isModal = false, onClose }) {
             }
 
             const data = await response.json()
-            return data.response || "Ribbit! I'm thinking about that... 🐸"
+            return data.response || "Ribbit! I'm thinking about that..."
         } catch (error) {
             console.error('Penny chat error:', error)
             const fallbacks = [
-                "Great question! The key to financial success is spending less than you earn. Try tracking your expenses for a week! 🐸",
-                "Ribbit! That's a smart thing to think about! Start by creating a simple budget - list your income and expenses. 🐸",
-                "I love that you're thinking about money! Remember: save first, spend second. Even small amounts add up! 🐸"
+                "Great question! The key to financial success is spending less than you earn. Try tracking your expenses for a week!",
+                "Ribbit! That's a smart thing to think about! Start by creating a simple budget - list your income and expenses.",
+                "I love that you're thinking about money! Remember: save first, spend second. Even small amounts add up!"
             ]
             return fallbacks[Math.floor(Math.random() * fallbacks.length)]
         }
@@ -103,8 +105,8 @@ export default function ChatInterface({ isModal = false, onClose }) {
             {isModal && (
                 <div className="bg-white p-4 rounded-t-3xl border-b-4 border-gray-100 flex items-center justify-between sticky top-0 z-50">
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-2xl animate-float">
-                            🐸
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-2xl animate-float overflow-hidden border-2 border-white">
+                            <img src={ScholarlyPenny} alt="Penny" className="w-full h-full object-cover" />
                         </div>
                         <div>
                             <h3 className="font-black text-gray-800">Chat with Penny</h3>
@@ -121,7 +123,7 @@ export default function ChatInterface({ isModal = false, onClose }) {
             )}
 
             <div className="flex-1 overflow-y-auto px-4 lg:px-6 space-y-4 pb-4 pt-4 custom-scrollbar">
-                {!isModal && <PennyMascot message="Ask me anything about money, ribbit! 💚" size="medium" animate />}
+                {!isModal && <PennyMascot message="Ask me anything about money, ribbit! 💚" size="medium" mood="scholarly" animate />}
 
                 {/* Quick Questions */}
                 <div className="mt-2 mb-4">
@@ -146,8 +148,8 @@ export default function ChatInterface({ isModal = false, onClose }) {
                         className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                         {message.sender === 'bot' && (
-                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0 self-end mb-1 text-sm">
-                                🐸
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0 self-end mb-1 text-sm overflow-hidden border border-emerald-200">
+                                <img src={ScholarlyPenny} alt="Penny" className="w-full h-full object-cover" />
                             </div>
                         )}
                         <div
@@ -166,8 +168,8 @@ export default function ChatInterface({ isModal = false, onClose }) {
 
                 {isLoading && (
                     <div className="flex justify-start">
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0 self-end mb-1 text-sm">
-                            🐸
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0 self-end mb-1 text-sm overflow-hidden border border-emerald-200">
+                            <img src={ScholarlyPenny} alt="Penny" className="w-full h-full object-cover" />
                         </div>
                         <div className="bg-white text-gray-800 px-4 py-3 rounded-2xl rounded-bl-none border-2 border-gray-200 shadow-sm">
                             <div className="flex gap-1">

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { Home, BookOpen, Trophy, User, Wallet, LogOut, Settings, ShoppingBag } from 'lucide-react'
 import { AuthProvider, useAuth } from '@/store/authContext'
+import Penny from '@/assets/Penny.png'
 import HomePage from '@/pages/HomePage'
 import DashboardPage from '@/pages/DashboardPage'
 import ChatbotPage from '@/pages/ChatbotPage'
@@ -71,7 +72,9 @@ const StatsHeader = ({ onOpenChat }) => {
           onClick={onOpenChat}
           className="px-3 py-1.5 bg-gradient-to-br from-green-400 to-green-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-transform flex items-center gap-1.5"
         >
-          <span className="text-lg">🐸</span>
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-white">
+            <img src={Penny} alt="Penny" className="w-full h-full object-cover" />
+          </div>
           <span className="text-sm">Ask!</span>
         </button>
       </div>

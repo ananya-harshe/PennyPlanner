@@ -6,6 +6,8 @@ import { PennyMascot } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
 import QuestCompletionAnimation from '@/components/QuestCompletionAnimation'
 import GiftBoxAnimation from '@/components/GiftBoxAnimation'
+import SadPenny from '@/assets/SadPenny.png'
+import SurprisedPenny from '@/assets/SurprisedPenny.png'
 
 // Multi-step Quiz Modal for Quest
 const QuestQuizModal = ({ quest, onClose, onComplete }) => {
@@ -13,6 +15,7 @@ const QuestQuizModal = ({ quest, onClose, onComplete }) => {
   const [selectedOption, setSelectedOption] = useState(null)
   const [submitted, setSubmitted] = useState(false)
   const [isCorrect, setIsCorrect] = useState(null)
+  const [reactionImage, setReactionImage] = useState(null)
 
   // Ensure quest.questions exists and use it
   const questions = quest.questions || []
@@ -36,6 +39,11 @@ const QuestQuizModal = ({ quest, onClose, onComplete }) => {
     const correct = selectedOption === currentQuestion.correct_answer
     setIsCorrect(correct)
     setSubmitted(true)
+
+    if (!correct) {
+      // Set random Penny reaction for wrong answer
+      setReactionImage(Math.random() > 0.5 ? SadPenny : SurprisedPenny)
+    }
   }
 
   const handleNext = async () => {
@@ -111,7 +119,16 @@ const QuestQuizModal = ({ quest, onClose, onComplete }) => {
 
         {submitted && (
           <div className={`text-center font-black p-3 rounded-xl mb-4 ${isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-            {isCorrect ? '🎉 Correct!' : '❌ Incorrect'}
+            {isCorrect ? (
+              '🎉 Correct!'
+            ) : (
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-lg border-2 border-white overflow-hidden animate-shake animation-pop-up">
+                  <img src={reactionImage} alt="Penny Reaction" className="w-full h-full object-cover" />
+                </div>
+                <span>❌ Incorrect</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -297,7 +314,7 @@ export default function QuestsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen pt-24 pb-24 gap-4">
         <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-500 font-bold animate-pulse">Generating your financial challenges... 🐸</p>
+        <p className="text-gray-500 font-bold animate-pulse">Generating your financial challenges...</p>
       </div>
     )
   }
