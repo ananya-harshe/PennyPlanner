@@ -14,6 +14,7 @@ import pennyRoutes from './routes/penny.js';
 import transactionRoutes from './routes/transactions.js';
 import userRoutes from './routes/users.js';
 import questRoutes from './routes/quests.js';
+import goalRoutes from './routes/goalRoutes.js'; // New Goal Routes
 
 dotenv.config();
 

@@ -49,14 +49,27 @@ export const getSpendingAnalysis = async (req, res) => {
       value
     }));
 
-    // Get AI Insights
+    // AI Insights
     const insights = await generateSpendingInsights(transactions);
+
+    // Calculate Decisions & Savings Rate
+    const goodDecisions = transactions.filter(t => t.is_good_decision).length;
+    const badDecisions = transactions.filter(t => !t.is_good_decision).length;
+
+    const income = transactions.filter(t => t.category === 'income').reduce((acc, t) => acc + t.amount, 0);
+    const savings = transactions.filter(t => t.category === 'savings').reduce((acc, t) => acc + t.amount, 0);
+    const savingsRate = income > 0 ? Math.round((savings / income) * 100) : 0;
 
     res.json({
       total: totalSpent,
       chartData,
       recent: transactions.slice(0, 10),
-      insights
+      insights,
+      stats: {
+        good_decisions: goodDecisions,
+        needs_improvement: badDecisions,
+        savings_rate: savingsRate
+      }
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

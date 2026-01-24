@@ -9,12 +9,16 @@ export function AuthProvider({ children }) {
 
   const [dashboardData, setDashboardData] = useState(null)
   const [questsData, setQuestsData] = useState(null)
+  const [homeData, setHomeData] = useState(null) // New cache for HomePage
+  const [goalsData, setGoalsData] = useState(null) // New cache for Goals
 
   const logout = useCallback(() => {
     setToken(null)
     setUser(null)
     setDashboardData(null)
     setQuestsData(null)
+    setHomeData(null)
+    setGoalsData(null)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
   }, [])
@@ -81,7 +85,7 @@ export function AuthProvider({ children }) {
   const isAuthenticated = !!token
 
   return (
-    <AuthContext.Provider value={{ token, user, loading, login, logout, refreshUser, isAuthenticated, dashboardData, setDashboardData, questsData, setQuestsData }}>
+    <AuthContext.Provider value={{ token, user, loading, login, logout, refreshUser, isAuthenticated, dashboardData, setDashboardData, questsData, setQuestsData, homeData, setHomeData, goalsData, setGoalsData }}>
       {children}
     </AuthContext.Provider>
   )

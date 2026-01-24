@@ -199,17 +199,16 @@ export default function QuestsPage() {
       setTotalXP(progressData.xp || 0)
 
       // Process XP history
-      const history = progressData.xp_history || []
+      // MOCK Learning Activity Data (Fixed Graph as requested)
+      const mockValues = [350, 580, 220, 850, 430, 920, 600];
       const last7Days = []
       for (let i = 6; i >= 0; i--) {
         const d = new Date()
         d.setDate(d.getDate() - i)
-        const dateStr = d.toISOString().split('T')[0]
         const dayName = d.toLocaleDateString('en-US', { weekday: 'short' })
-        const found = history.find(h => h.date === dateStr)
         last7Days.push({
           name: dayName,
-          xp: found ? found.xp : 0
+          xp: mockValues[6 - i] // Use mock values in order
         })
       }
       setLearningStats(last7Days)

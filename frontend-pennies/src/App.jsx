@@ -14,6 +14,7 @@ import LoginPage from '@/pages/LoginPage'
 import DesktopNavigation from '@/components/DesktopNavigation'
 import StatsSidebar from '@/components/StatsSidebar'
 import ScrollToTop from '@/components/ScrollToTop'
+import PennyChatWidget from '@/components/PennyChatWidget'
 import { Toaster } from 'sonner'
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api'
@@ -55,7 +56,7 @@ const BottomNav = () => {
 }
 
 // Header Component (Mobile Only)
-const StatsHeader = () => {
+const StatsHeader = ({ onOpenChat }) => {
   return (
     <header className="bg-white border-b-4 border-gray-200 sticky top-0 z-40 lg:hidden">
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
@@ -65,6 +66,14 @@ const StatsHeader = () => {
           </div>
           <h1 className="text-2xl font-black text-gray-800">PennyWise</h1>
         </div>
+
+        <button
+          onClick={onOpenChat}
+          className="px-3 py-1.5 bg-gradient-to-br from-green-400 to-green-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-transform flex items-center gap-1.5"
+        >
+          <span className="text-lg">🐸</span>
+          <span className="text-sm">Ask!</span>
+        </button>
       </div>
     </header>
   )
@@ -80,6 +89,7 @@ export default function App() {
 
 function AppContent() {
   const { isAuthenticated, loading, user } = useAuth()
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
   if (loading) {
     return (
@@ -120,7 +130,7 @@ function AppContent() {
 
             {/* Main Content Area */}
             <main className="flex-1 w-full lg:max-w-4xl lg:mx-0">
-              <StatsHeader />
+              <StatsHeader onOpenChat={() => setIsChatOpen(true)} />
               <div className="min-h-screen pb-24 lg:pb-12">
                 <Routes>
                   <Route path="/" element={<HomePage />} />
@@ -137,8 +147,11 @@ function AppContent() {
             </main>
 
             {/* Desktop Right Stats */}
-            <StatsSidebar user={user} />
+            <StatsSidebar user={user} onOpenChat={() => setIsChatOpen(true)} />
           </div>
+
+          {/* Global Chat Widget */}
+          <PennyChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
         </div>
       </BrowserRouter>
     </div>
