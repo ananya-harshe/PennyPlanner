@@ -4,7 +4,7 @@ A full-stack application for financial planning with React frontend and Python b
 
 ## Backend Setup
 
-The backend is built with Python and uses MongoDB for data storage.
+The backend is built with FastAPI (Python web framework) and uses MongoDB for data storage.
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -29,7 +29,7 @@ The backend is built with Python and uses MongoDB for data storage.
 
 3. Install dependencies:
    ```bash
-   pip install -r requirements.txt
+   pip install -r data/requirements.txt
    ```
 
 ### Environment Variables
@@ -38,15 +38,21 @@ Create a `.env` file in the backend directory with the following variables:
 ```
 MONGO_SRV=your_mongodb_connection_string
 DATABASE=your_database_name
+NESSIE=your_nessie_api_key
 ```
 
 ### Running the Backend
 
-To run the backend server:
+To run the FastAPI server with auto-reload during development:
 ```bash
-python -m your_main_backend_file.py
+uvicorn data.main:app --reload --host 0.0.0.0 --port 8000
 ```
-(Note: Update this with the actual command to run your backend server)
+
+The API will be available at `http://localhost:8000`
+
+You can also view the interactive API documentation at:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
 
 ## Frontend Setup
 
