@@ -56,7 +56,7 @@ export default function ShopPage() {
     }
 
     return (
-        <div className="p-4 pt-24 pb-24 min-h-screen bg-gray-50">
+        <div className="p-4 lg:p-8 lg:px-10 space-y-6 pb-24 lg:pb-8 min-h-screen bg-transparent">
 
             {/* Header & Balance */}
             <div className="flex items-center justify-between mb-6 px-2">
@@ -82,7 +82,7 @@ export default function ShopPage() {
             />
 
             {/* Shop Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {shopItems.map((item) => (
                     <div key={item.id} className="card-3d p-4 border-4 border-gray-100 flex flex-col items-center text-center relative overflow-hidden">
 

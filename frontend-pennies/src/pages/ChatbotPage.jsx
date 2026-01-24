@@ -99,49 +99,50 @@ export default function ChatbotPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-48 pt-24 flex flex-col">
-      <PennyMascot message="Ask me anything about money! 💚" size="medium" animate />
+    <div className="flex flex-col h-[calc(100vh-64px)] lg:h-screen lg:px-0">
+      {/* Mobile Header Spacer if needed, or handled by layout */}
 
-      {/* Quick Questions */}
-      <div className="px-4 mt-4">
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {quickQuestions.map((question, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setInput(question)
-              }}
-              className="flex-shrink-0 px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-full text-sm font-bold transition-colors flex items-center gap-1"
-            >
-              <Sparkles className="w-3 h-3" />
-              {question}
-            </button>
-          ))}
+      <div className="flex-1 overflow-y-auto px-4 lg:px-8 space-y-4 pb-4 pt-4 lg:pt-8 custom-scrollbar">
+        <PennyMascot message="Ask me anything about money! 💚" size="medium" animate />
+
+        {/* Quick Questions */}
+        <div className="mt-4 mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {quickQuestions.map((question, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setInput(question)
+                }}
+                className="flex-shrink-0 px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-full text-sm font-bold transition-colors flex items-center gap-1 whitespace-nowrap"
+              >
+                <Sparkles className="w-3 h-3" />
+                {question}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Chat Container */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4 mt-4">
+        {/* Chat Messages */}
         {messages.map(message => (
           <div
             key={message.id}
             className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {message.sender === 'bot' && (
-              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0 self-end mb-1">
                 🐸
               </div>
             )}
             <div
-              className={`max-w-xs px-4 py-3 rounded-2xl font-medium ${message.sender === 'user'
-                  ? 'bg-emerald-500 text-white rounded-br-none'
-                  : 'bg-white text-gray-800 rounded-bl-none border-2 border-gray-200 shadow-sm'
+              className={`max-w-[85%] lg:max-w-md px-5 py-3 rounded-2xl font-medium shadow-sm text-sm lg:text-base ${message.sender === 'user'
+                ? 'bg-emerald-500 text-white rounded-br-none'
+                : 'bg-white text-gray-800 rounded-bl-none border-2 border-gray-200'
                 }`}
             >
-              <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
+              <p className="whitespace-pre-wrap break-words leading-relaxed">{message.text}</p>
               <p
-                className={`text-xs mt-1 ${message.sender === 'user' ? 'text-emerald-100' : 'text-gray-500'
-                  }`}
+                className={`text-[10px] mt-1 text-right opacity-70 font-bold`}
               >
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
@@ -151,7 +152,7 @@ export default function ChatbotPage() {
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0 self-end mb-1">
               🐸
             </div>
             <div className="bg-white text-gray-800 px-4 py-3 rounded-2xl rounded-bl-none border-2 border-gray-200 shadow-sm">
@@ -163,27 +164,28 @@ export default function ChatbotPage() {
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      {/* Input - positioned above the bottom navigation */}
-      <div className="fixed bottom-20 left-0 right-0 bg-white border-t-4 border-gray-200 px-4 py-4 z-40">
-        <div className="flex gap-3 max-w-4xl mx-auto">
+      {/* Input Area */}
+      {/* Mobile: Fixed above nav. Desktop: Sticky at bottom of container */}
+      <div className="bg-white border-t-4 border-gray-200 p-4 sticky bottom-0 z-40 lg:mb-0 mb-20">
+        <div className="flex gap-3 max-w-4xl mx-auto items-center">
           <input
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask Penny about money..."
-            className="flex-1 border-2 border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-medium text-gray-800 placeholder-gray-400"
+            className="flex-1 bg-gray-50 border-2 border-gray-200 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-bold text-gray-700 placeholder-gray-400 transition-all"
             disabled={isLoading}
           />
           <button
             onClick={handleSendMessage}
             disabled={isLoading || !input.trim()}
-            className="bg-emerald-500 text-white font-black rounded-2xl px-6 border-b-4 border-emerald-700 hover:bg-emerald-600 active:translate-y-1 active:border-b-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="bg-emerald-500 text-white p-3 rounded-2xl border-b-4 border-emerald-700 hover:bg-emerald-600 active:translate-y-1 active:border-b-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-6 h-6" />
           </button>
         </div>
       </div>

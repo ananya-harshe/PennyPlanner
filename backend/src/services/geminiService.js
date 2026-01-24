@@ -268,13 +268,19 @@ export const generateProceduralQuests = async (transactions = []) => {
     Instead, dive deep into the "Infinite Library of Finance". 
     Choose 3 RANDOM concepts from these diverse fields:
     - Behavioral Economics (e.g. Nudging, Anchoring, Loss Aversion)
-    - Investment History (e.g. Tulip Mania, Dot-com bubble)
     - Frugal Living Hacks (e.g. Meal prepping, DIY repairs)
     - Advanced Personal Finance (e.g. Tax-loss harvesting, Roth conversions)
     - Financial Psychology (e.g. Money scripts, Impulse control)
     - Micro-economics (e.g. Supply & Demand in daily life)
+    - And more! Don't make it a history lesson.
     
     Make the topics SURPRISING and EDUCATIONAL.
+    
+    Quest Structure:
+    Each quest MUST have exactly 4 questions.
+    - Questions 1-3: PERSONALIZED APPLICATION. These must directly reference the user's "Top Categories" or total spending context. Ask them to apply the concept to their actual habits. (e.g. "You spent $50 on Dining. If you applied the '24-hour rule' to your dining...")
+    - Question 4: GENERAL KNOWLEDGE. A conceptual question about the Quest's topic itself, testing their understanding of the definition or history.
+    Make sure all questions have an objectively correct answer, do not ask my opinion for anything
     
     Output: A valid JSON array of 3 objects. Match this schema exactly:
     [
@@ -292,13 +298,20 @@ export const generateProceduralQuests = async (transactions = []) => {
                 "options": ["A", "B", "C", "D"],
                 "correct_answer": 0, // index 0-3
                 "explanation": "Educational, fun explanation. 🐸",
-                "context_source": "theory" // or "transaction" if referencing user data
+                "context_source": "transaction" // for Q1-Q3
+            },
+            // ... Q2, Q3 (transaction based)
+            {
+                // Q4 (General Concept)
+                "question": "Concept definition question...",
+                "options": ["A", "B", "C", "D"],
+                "correct_answer": 0,
+                "explanation": "Definition info. 🐸",
+                "context_source": "theory"
             }
         ]
       }
-    ]
-    
-    Ensure questions are mixed: some concept-based, some practical.`;
+    ]`;
 
     console.log(`   📝 [PROMPT] Prompt length: ${prompt.length} characters`);
     const geminiStart = Date.now();

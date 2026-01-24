@@ -72,7 +72,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-4 space-y-6 pb-24" data-testid="dashboard-page">
+    <div className="p-4 lg:p-8 lg:px-10 space-y-6 pb-24 lg:pb-8" data-testid="dashboard-page">
       {/* Penny Welcome */}
       <PennyMascot
         message={pennyMessage || "Your finances are looking great!"}

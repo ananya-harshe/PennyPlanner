@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import axios from 'axios'
-import { Toaster } from 'sonner'
 import { Home, BookOpen, Trophy, User, Wallet, LogOut, Settings, ShoppingBag } from 'lucide-react'
 import { AuthProvider, useAuth } from '@/store/authContext'
 import HomePage from '@/pages/HomePage'
@@ -12,10 +10,14 @@ import LearningPage from '@/pages/LearningPage'
 import SettingsPage from '@/pages/SettingsPage'
 import ShopPage from '@/pages/ShopPage'
 import LoginPage from '@/pages/LoginPage'
+import DesktopNavigation from '@/components/DesktopNavigation'
+import StatsSidebar from '@/components/StatsSidebar'
+import ScrollToTop from '@/components/ScrollToTop'
+import { Toaster } from 'sonner'
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api'
 
-// Navigation Component
+// Navigation Component (Mobile Only)
 const BottomNav = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -30,7 +32,7 @@ const BottomNav = () => {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-4 border-gray-200 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-4 border-gray-200 z-50 lg:hidden">
       <div className="max-w-4xl mx-auto px-4 flex justify-around items-center">
         {navItems.map((item) => (
           <button
@@ -60,10 +62,10 @@ const BottomNav = () => {
   )
 }
 
-// Header Component
+// Header Component (Mobile Only)
 const StatsHeader = () => {
   return (
-    <header className="bg-white border-b-4 border-gray-200 sticky top-0 z-40">
+    <header className="bg-white border-b-4 border-gray-200 sticky top-0 z-40 lg:hidden">
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="bg-emerald-500 rounded-2xl p-2">
@@ -85,7 +87,7 @@ export default function App() {
 }
 
 function AppContent() {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, user } = useAuth()
 
   if (loading) {
     return (
@@ -114,18 +116,37 @@ function AppContent() {
   return (
     <div className="app-container bg-gray-100 min-h-screen">
       <BrowserRouter>
+        <ScrollToTop />
         <Toaster position="top-center" richColors />
-        <StatsHeader />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/chatbot" element={<ChatbotPage />} />
-          <Route path="/quests" element={<QuestsPage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/learn" element={<LearningPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
-        <BottomNav />
+
+        {/* Desktop Left Nav - Fixed Position */}
+        <DesktopNavigation />
+
+        {/* Main Layout - Offset by Sidebar Width on Desktop */}
+        <div className="lg:ml-72 flex justify-center min-h-screen">
+          <div className="flex w-full max-w-[1200px] gap-6">
+
+            {/* Main Content Area */}
+            <main className="flex-1 w-full lg:max-w-4xl lg:mx-0">
+              <StatsHeader />
+              <div className="min-h-screen pb-24 lg:pb-12">
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/chatbot" element={<ChatbotPage />} />
+                  <Route path="/quests" element={<QuestsPage />} />
+                  <Route path="/shop" element={<ShopPage />} />
+                  <Route path="/learn" element={<LearningPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                </Routes>
+              </div>
+              <BottomNav />
+            </main>
+
+            {/* Desktop Right Stats */}
+            <StatsSidebar user={user} />
+          </div>
+        </div>
       </BrowserRouter>
     </div>
   )

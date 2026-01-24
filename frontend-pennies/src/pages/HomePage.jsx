@@ -55,7 +55,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="p-4 space-y-6 pb-24" data-testid="home-page">
+    <div className="p-4 lg:p-8 lg:px-10 space-y-6 pb-24 lg:pb-8 min-h-screen bg-transparent" data-testid="home-page">
       {/* Penny Welcome */}
       <PennyMascot
         message={pennyMessage || "Hey there! Ready to become a money master? 🐸"}

@@ -267,7 +267,7 @@ export default function QuestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 pt-24">
+    <div className="min-h-screen bg-transparent p-4 lg:p-8 lg:px-10 space-y-6 pb-24 lg:pb-8">
       {activeQuest && (
         <QuestQuizModal
           quest={activeQuest}

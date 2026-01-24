@@ -99,7 +99,7 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="p-4 space-y-6 pb-24 max-w-2xl mx-auto">
+        <div className="p-4 lg:p-8 lg:px-10 space-y-6 pb-24 lg:pb-8 max-w-2xl mx-auto">
             <h1 className="text-2xl font-black text-gray-800 mb-6">Settings</h1>
 
             {/* Daily Goal Section */}

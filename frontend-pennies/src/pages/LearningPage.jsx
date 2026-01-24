@@ -84,7 +84,7 @@ export default function LearningPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-24 pt-24">
+        <div className="min-h-screen bg-gray-50 p-4 lg:p-8 lg:px-10 space-y-6 pb-24 lg:pb-8">
             {/* Quiz Modal */}
             {activeQuiz && (
                 <QuizScreen
@@ -170,12 +170,12 @@ export default function LearningPage() {
                             <div
                                 key={lesson.id}
                                 className={`card-3d p-4 border-4 transition-all ${isCompleted
-                                        ? 'border-green-300 bg-green-50 opacity-75'
-                                        : isCurrent
-                                            ? 'border-emerald-400 bg-emerald-50'
-                                            : lesson.is_locked
-                                                ? 'border-gray-200 opacity-60'
-                                                : 'border-gray-200'
+                                    ? 'border-green-300 bg-green-50 opacity-75'
+                                    : isCurrent
+                                        ? 'border-emerald-400 bg-emerald-50'
+                                        : lesson.is_locked
+                                            ? 'border-gray-200 opacity-60'
+                                            : 'border-gray-200'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
@@ -187,8 +187,8 @@ export default function LearningPage() {
                                         <h4 className="font-bold text-gray-800">{lesson.title}</h4>
                                         <div className="flex items-center gap-2 mt-1">
                                             <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${lesson.category === 'budgeting' ? 'bg-blue-100 text-blue-700' :
-                                                    lesson.category === 'investing' ? 'bg-purple-100 text-purple-700' :
-                                                        'bg-orange-100 text-orange-700'
+                                                lesson.category === 'investing' ? 'bg-purple-100 text-purple-700' :
+                                                    'bg-orange-100 text-orange-700'
                                                 }`}>
                                                 {lesson.category}
                                             </span>
