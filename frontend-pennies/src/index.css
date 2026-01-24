@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Macondo&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -39,26 +39,36 @@
 }
 
 * {
-  @apply antialiased text-center;
-  font-family: "Macondo", cursive;
+  @apply antialiased;
+  font-family: "Nunito", sans-serif;
   text-decoration: none;
 }
 
 html {
-  font-family: "Macondo", cursive;
+  font-family: "Nunito", sans-serif;
+}
+
+:root {
+  --baltic-blue: #22577a;
+  --tropical-teal: #38a3a5;
+  --emerald: #57cc99;
+  --light-green: #80ed99;
+  --tea-green: #c7f9cc;
 }
 
 html,
 body {
-  background-image: url('assets/skyblue.jpg');
-  background-size: cover;
-  background-attachment: fixed;
+  background-color: var(--tea-green);
+  /* background-image: url('assets/skyblue.jpg'); */
+  /* background-size: cover; */
+  /* background-attachment: fixed; */
   @apply m-0 p-0 w-full h-full;
 }
 
 header {
   background-image: url('assets/cloud.png');
   background-size: cover;
+  background-color: var(--light-green);
   padding: 1rem 0;
 }
 
@@ -98,14 +108,11 @@ header {
 }
 
 /* Cards with rounded Duolingo style */
+/* Cards with rounded Duolingo style */
 .card-3d {
-  @apply rounded-[32px] bg-pink-100 shadow-lg border-2 border-pink-200 overflow-hidden;
-  mask-image: radial-gradient(32px at 0 0, #0000 98%, #000 101%),
-              radial-gradient(32px at 100% 0, #0000 98%, #000 101%),
-              radial-gradient(32px at 0 100%, #0000 98%, #000 101%),
-              radial-gradient(32px at 100% 100%, #0000 98%, #000 101%);
-  mask-composite: intersect;
-  -webkit-mask-composite: destination-in; /* Support for older webkit */
+  @apply rounded-[32px] bg-white bg-opacity-30 backdrop-blur-md shadow-lg border-2 border-emerald-200 border-opacity-50 overflow-hidden;
+  /* Mask removed to allow border to be visible at corners */
+  /* Support for older webkit */
 
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
@@ -116,10 +123,6 @@ header {
 }
 
 /* Typography */
-<<<<<<< HEAD
-h1, h2, h3, h4, h5, h6 {
-  @apply font-black text-gray-800 text-center;
-=======
 h1,
 h2,
 h3,
@@ -127,7 +130,6 @@ h4,
 h5,
 h6 {
   @apply font-black text-gray-800;
->>>>>>> 01c369c672a032c2745dfd37d8be73e78067b95d
 }
 
 h1 {
@@ -231,7 +233,8 @@ p {
 }
 
 /* Label and span text centering */
-span, label {
+span,
+label {
   @apply text-center;
 }
 
@@ -275,7 +278,6 @@ span, label {
   @apply transition-transform duration-200 hover:scale-105;
 }
 
-<<<<<<< HEAD
 /* Icon colors */
 .icon-green {
   @apply text-emerald-500;
@@ -299,7 +301,7 @@ footer {
   padding: 1rem 0;
   color: white;
 }
-=======
+
 /* Quest Completion Animations */
 @keyframes fadeIn {
   from {
@@ -412,4 +414,3 @@ footer {
   opacity: 0;
   animation-fill-mode: forwards;
 }
->>>>>>> 01c369c672a032c2745dfd37d8be73e78067b95d
