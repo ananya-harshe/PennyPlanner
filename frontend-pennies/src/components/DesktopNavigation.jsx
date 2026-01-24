@@ -1,13 +1,14 @@
 import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, BookOpen, User, ShoppingBag, Trophy, Settings, Wallet } from 'lucide-react'
+import { Home, BookOpen, User, ShoppingBag, Trophy, Settings, Wallet, Sparkles } from 'lucide-react'
 
 const navItems = [
     { path: '/', icon: Home, label: 'Home' },
     { path: '/dashboard', icon: BookOpen, label: 'Dashboard' },
     { path: '/quests', icon: User, label: 'Quests' },
+    { path: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
     { path: '/shop', icon: ShoppingBag, label: 'Shop' },
-    { path: '/chatbot', icon: Trophy, label: 'Advice' },
+    { path: '/chatbot', icon: Sparkles, label: 'Advice' },
 ]
 
 export default function DesktopNavigation() {
