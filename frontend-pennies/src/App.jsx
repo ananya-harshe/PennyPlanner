@@ -58,14 +58,16 @@ const BottomNav = () => {
   )
 }
 
+import AppIcon from '@/assets/AppIcon.png'
+
 // Header Component (Mobile Only)
 const StatsHeader = ({ onOpenChat }) => {
   return (
     <header className="bg-white border-b-4 border-gray-200 sticky top-0 z-40 lg:hidden">
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="bg-emerald-500 rounded-2xl p-2">
-            <Wallet className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-sm">
+            <img src={AppIcon} alt="App Icon" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-black text-gray-800">PennyWise</h1>
         </div>
