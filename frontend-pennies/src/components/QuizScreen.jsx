@@ -17,7 +17,6 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
     const [quizCompleted, setQuizCompleted] = useState(false)
     const [loading, setLoading] = useState(true)
     const [currentMood, setCurrentMood] = useState('thinking')
-    const [reactionImage, setReactionImage] = useState(null)
 
     useEffect(() => {
         fetchQuiz()
@@ -66,12 +65,10 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
         if (correct) {
             setScore(prev => prev + 1)
             setCurrentMood('happy')
-            setReactionImage(PomPomPenny)
         } else {
             // Randomly pick sad or surprised for wrong answer
             const isSad = Math.random() > 0.5
             setCurrentMood(isSad ? 'sad' : 'surprised')
-            setReactionImage(isSad ? SadPenny : SurprisedPenny)
         }
     }
 
@@ -82,7 +79,6 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
             setShowResult(false)
             setIsCorrect(false)
             setCurrentMood('thinking')
-            setReactionImage(null)
         } else {
             completeQuiz()
         }
@@ -227,10 +223,10 @@ export default function QuizScreen({ lessonId, lessonTitle, onClose, onComplete 
                         animate={true}
                     />
                     {/* Show animated reaction image when answer is checked */}
-                    {showResult && reactionImage && (
+                    {showResult && (
                         <div className="flex-shrink-0 animate-bounce">
                             <img
-                                src={reactionImage}
+                                src={isCorrect ? PomPomPenny : (currentMood === 'sad' ? SadPenny : SurprisedPenny)}
                                 alt="Penny's reaction"
                                 className="w-16 h-16 object-contain drop-shadow-lg"
                             />

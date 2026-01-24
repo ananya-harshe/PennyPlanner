@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { Home, BookOpen, Trophy, User, Wallet, LogOut, Settings, ShoppingBag } from 'lucide-react'
+import { Home, BookOpen, Trophy, User, Wallet, LogOut, Settings, ShoppingBag, Sparkles } from 'lucide-react'
 import { AuthProvider, useAuth } from '@/store/authContext'
 import Penny from '@/assets/Penny.png'
 import HomePage from '@/pages/HomePage'
@@ -11,6 +11,7 @@ import QuestsPage from '@/pages/QuestsPage'
 import LeaderboardPage from '@/pages/LeaderboardPage'
 import SettingsPage from '@/pages/SettingsPage'
 import ShopPage from '@/pages/ShopPage'
+import FuturePlanningPage from '@/pages/FuturePlanningPage'
 import LoginPage from '@/pages/LoginPage'
 import DesktopNavigation from '@/components/DesktopNavigation'
 import StatsSidebar from '@/components/StatsSidebar'
@@ -32,6 +33,7 @@ const BottomNav = () => {
     { path: '/quests', icon: User, label: 'Quests' },
     { path: '/leaderboard', icon: Trophy, label: 'Rank' },
     { path: '/shop', icon: ShoppingBag, label: 'Shop' },
+    { path: '/future-planning', icon: Sparkles, label: 'Future' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ]
 
@@ -127,35 +129,33 @@ function AppContent() {
         {/* Desktop Left Nav - Fixed Position */}
         <DesktopNavigation />
 
-        {/* Main Layout - Offset by Sidebar Width on Desktop */}
-        <div className="lg:ml-72 flex justify-center min-h-screen">
-          <div className="flex w-full max-w-[1200px] gap-6">
+        {/* Desktop Right Stats - Fixed Position */}
+        <StatsSidebar user={user} onOpenChat={() => setIsChatOpen(true)} />
 
-            {/* Main Content Area */}
-            <main className="flex-1 w-full lg:max-w-4xl lg:mx-0">
-              <StatsHeader onOpenChat={() => setIsChatOpen(true)} />
-              <div className="min-h-screen pb-24 lg:pb-12">
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/chatbot" element={<ChatbotPage />} />
-                  <Route path="/quests" element={<QuestsPage />} />
-                  <Route path="/leaderboard" element={<LeaderboardPage />} />
-                  <Route path="/shop" element={<ShopPage />} />
+        {/* Main Layout - Offset by both sidebars on Desktop */}
+        <div className="lg:ml-72 xl:mr-80 h-screen overflow-y-auto">
+          {/* Main Content Area - Centered */}
+          <main className="w-full max-w-4xl mx-auto px-4">
+            <StatsHeader onOpenChat={() => setIsChatOpen(true)} />
+            <div className="min-h-screen pb-24 lg:pb-12">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/chatbot" element={<ChatbotPage />} />
+                <Route path="/quests" element={<QuestsPage />} />
+                <Route path="/leaderboard" element={<LeaderboardPage />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/future-planning" element={<FuturePlanningPage />} />
 
-                  <Route path="/settings" element={<SettingsPage />} />
-                </Routes>
-              </div>
-              <BottomNav />
-            </main>
-
-            {/* Desktop Right Stats */}
-            <StatsSidebar user={user} onOpenChat={() => setIsChatOpen(true)} />
-          </div>
-
-          {/* Global Chat Widget */}
-          <PennyChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+                <Route path="/settings" element={<SettingsPage />} />
+              </Routes>
+            </div>
+            <BottomNav />
+          </main>
         </div>
+
+        {/* Global Chat Widget */}
+        <PennyChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
       </BrowserRouter>
     </div>
   )

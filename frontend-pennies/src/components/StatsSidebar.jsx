@@ -5,7 +5,7 @@ import Penny from '@/assets/Penny.png'
 
 export default function StatsSidebar({ user, onOpenChat }) {
     return (
-        <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 p-8 space-y-8 bg-gray-50 overflow-y-auto">
+        <aside className="hidden xl:flex flex-col w-80 h-screen fixed top-0 right-0 p-8 space-y-8 bg-gray-50 overflow-y-auto border-l-4 border-gray-200 z-40">
             {/* Stats Section */}
             <div className="space-y-4">
                 <h2 className="text-xl font-black text-gray-800 mb-6">Your Stats</h2>
