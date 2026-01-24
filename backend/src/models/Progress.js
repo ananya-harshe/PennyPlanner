@@ -43,6 +43,10 @@ const progressSchema = new mongoose.Schema({
     type: Number,
     default: 100
   },
+  xp_history: [{
+    date: String, // format YYYY-MM-DD
+    xp: Number
+  }],
   daily_challenge_completed: {
     type: Boolean,
     default: false

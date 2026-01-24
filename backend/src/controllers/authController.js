@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import { isDbConnected } from '../config/database.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -7,8 +8,22 @@ const generateToken = (id) => {
   });
 };
 
+// Middleware check for database connectivity
+const checkDatabaseConnection = (req, res) => {
+  if (!isDbConnected) {
+    res.status(503).json({
+      message: 'Database temporarily unavailable. Please try again in a moment.',
+      error: 'DATABASE_UNAVAILABLE'
+    });
+    return false;
+  }
+  return true;
+};
+
 export const register = async (req, res) => {
   try {
+    if (!checkDatabaseConnection(req, res)) return;
+
     const { username, email, password } = req.body;
 
     // Check if user exists
@@ -42,6 +57,8 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
+    if (!checkDatabaseConnection(req, res)) return;
+
     const { email, password } = req.body;
 
     if (!email || !password) {

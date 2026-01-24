@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, PieChart, CreditCard, Wallet } from 'lucide-react'
+import { TrendingUp, TrendingDown, PieChart, CreditCard, Wallet, Activity } from 'lucide-react'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { theme } from '@/theme'
@@ -11,17 +12,37 @@ export default function DashboardPage() {
   const [pennyMessage, setPennyMessage] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch Penny message
-        const messageResponse = await fetch(`${API_URL}/penny/message?context=home`, {
-          headers: getAuthHeaders()
-        })
-        const messageData = await messageResponse.json()
-        setPennyMessage(messageData.message || "Your finances are looking great! Keep it up! 🐸")
+  const [learningStats, setLearningStats] = useState([])
+  const [totalXP, setTotalXP] = useState(0)
 
-        // Mock transaction data for now (since we don't have a transactions API endpoint yet)
+  useEffect(() => {
+    const fetchCriticalData = async () => {
+      try {
+        setLoading(true)
+
+        // Fetch progress data (fast)
+        const progressResponse = await fetch(`${API_URL}/progress`, { headers: getAuthHeaders() })
+        const progressData = await progressResponse.json()
+
+        setTotalXP(progressData.xp || 0)
+
+        // Process XP history for the graph (last 7 days)
+        const history = progressData.xp_history || []
+        const last7Days = []
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date()
+          d.setDate(d.getDate() - i)
+          const dateStr = d.toISOString().split('T')[0]
+          const dayName = d.toLocaleDateString('en-US', { weekday: 'short' })
+          const found = history.find(h => h.date === dateStr)
+          last7Days.push({
+            name: dayName,
+            xp: found ? found.xp : 0
+          })
+        }
+        setLearningStats(last7Days)
+
+        // Mock transaction data
         const mockTransactions = [
           { id: '1', category: 'Groceries', amount: 125.50, date: '2026-01-23', type: 'expense' },
           { id: '2', category: 'Salary', amount: 3500, date: '2026-01-20', type: 'income' },
@@ -60,14 +81,28 @@ export default function DashboardPage() {
           categorySpending
         })
       } catch (e) {
-        console.error("Failed to fetch data", e)
+        console.error("Failed to fetch critical data", e)
         toast.error("Failed to load dashboard")
-        setPennyMessage("Let me help you understand your finances! 🐸")
       } finally {
         setLoading(false)
       }
     }
-    fetchData()
+
+    const fetchPennyMessage = async () => {
+      try {
+        const messageResponse = await fetch(`${API_URL}/penny/message?context=home`, {
+          headers: getAuthHeaders()
+        })
+        const messageData = await messageResponse.json()
+        setPennyMessage(messageData.message)
+      } catch (e) {
+        console.error("Failed to fetch Penny message", e)
+        // Fallback message is already set in render or initial state if we wanted
+      }
+    }
+
+    fetchCriticalData()
+    fetchPennyMessage()
   }, [])
 
   if (loading) {
@@ -83,11 +118,68 @@ export default function DashboardPage() {
   return (
     <div className="p-4 space-y-6 pb-24" data-testid="dashboard-page">
       {/* Penny Welcome */}
-      <PennyMascot 
+      <PennyMascot
         message={pennyMessage || "Your finances are looking great!"}
         size="medium"
         mood="happy"
       />
+
+      {/* Learning Activity Graph */}
+      <div className="card-3d p-8 border-4 border-indigo-200">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-500 rounded-2xl p-3">
+              <Activity className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-black text-gray-800">Learning Activity</h3>
+              <p className="text-sm text-gray-500 font-bold">Total XP: {totalXP}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={learningStats}>
+              <defs>
+                <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#6B7280', fontSize: 12, fontWeight: 'bold' }}
+                dy={10}
+              />
+              <YAxis
+                hide={true}
+              />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: '16px',
+                  border: 'none',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  padding: '12px'
+                }}
+                cursor={{ stroke: '#6366f1', strokeWidth: 2, strokeDasharray: '5 5' }}
+              />
+              <Area
+                type="monotone"
+                dataKey="xp"
+                stroke="#6366f1"
+                strokeWidth={4}
+                fillOpacity={1}
+                fill="url(#colorXp)"
+                animationDuration={1500}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid md:grid-cols-3 gap-4">
@@ -129,6 +221,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Spending by Category */}
+
+
+
+
+      {/* Spending by Category */}
       <div className="card-3d p-8 border-4 border-gray-200">
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-emerald-500 rounded-2xl p-3">
@@ -161,11 +258,19 @@ export default function DashboardPage() {
 
       {/* Recent Transactions */}
       <div className="card-3d p-8 border-4 border-gray-200">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="bg-sky-500 rounded-2xl p-3">
-            <CreditCard className="w-6 h-6 text-white" />
+        <div className="flex items-center gap-3 mb-6 justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-sky-500 rounded-2xl p-3">
+              <CreditCard className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-800">Recent Transactions</h3>
           </div>
-          <h3 className="text-2xl font-black text-gray-800">Recent Transactions</h3>
+          <button
+            onClick={() => navigate('/spending')}
+            className="text-sky-500 font-bold text-sm hover:underline"
+          >
+            View All
+          </button>
         </div>
         <div className="space-y-4">
           {transactions?.list.slice(0, 5).map((transaction) => (
@@ -175,9 +280,8 @@ export default function DashboardPage() {
                 <p className="text-xs font-bold text-gray-500">{transaction.date}</p>
               </div>
               <span
-                className={`font-black ${
-                  transaction.type === 'income' ? 'text-emerald-500' : 'text-red-500'
-                }`}
+                className={`font-black ${transaction.type === 'income' ? 'text-emerald-500' : 'text-red-500'
+                  }`}
               >
                 {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
               </span>

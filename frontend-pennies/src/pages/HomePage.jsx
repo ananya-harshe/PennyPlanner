@@ -18,19 +18,12 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Mock progress data
-        setProgress({
-          daily_xp: 35,
-          daily_goal: 50,
-          streak: 5,
-          hearts: 3,
-          gems: 100,
-          xp: 450,
-          badges: ['badge1', 'badge2'],
-          completed_lessons: ['lesson1', 'lesson2'],
-        })
+        // Fetch real progress data
+        const progressResponse = await fetch(`${API_URL}/progress`, { headers: getAuthHeaders() })
+        const progressData = await progressResponse.json()
+        setProgress(progressData)
 
-        // Mock transaction data
+        // Mock transaction data (keep mocked for now as we focus on XP target sync)
         setTransactions({
           analysis: {
             good_decisions: 12,
@@ -64,7 +57,7 @@ export default function HomePage() {
   return (
     <div className="p-4 space-y-6 pb-24" data-testid="home-page">
       {/* Penny Welcome */}
-      <PennyMascot 
+      <PennyMascot
         message={pennyMessage || "Hey there! Ready to become a money master? 🐸"}
         size="medium"
         mood="happy"
@@ -84,7 +77,7 @@ export default function HomePage() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-3">
-        <button 
+        <button
           onClick={() => navigate('/learn')}
           className="card-3d p-6 border-4 border-gray-200 hover:scale-105 transition-transform flex flex-col items-center gap-2"
           data-testid="continue-learning-btn"
@@ -93,8 +86,8 @@ export default function HomePage() {
           <span className="font-bold text-gray-700 text-sm text-center">Continue Learning</span>
           <span className="text-xs text-gray-500">{progress?.completed_lessons?.length || 0} done</span>
         </button>
-        
-        <button 
+
+        <button
           onClick={() => navigate('/dashboard')}
           className="card-3d p-6 border-4 border-gray-200 hover:scale-105 transition-transform flex flex-col items-center gap-2"
           data-testid="daily-challenge-btn"
@@ -106,7 +99,7 @@ export default function HomePage() {
       </div>
 
       {/* Ask Penny Button */}
-      <button 
+      <button
         onClick={() => setShowPennyTip(true)}
         className="w-full card-3d p-4 border-4 border-gray-200 hover:scale-105 transition-transform flex items-center gap-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
         data-testid="ask-penny-btn"
@@ -128,14 +121,14 @@ export default function HomePage() {
         <div className="card-3d p-6 border-4 border-gray-200" data-testid="transactions-card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-gray-700">Your Spending Habits</h3>
-            <button 
-              onClick={() => navigate('/transactions')}
+            <button
+              onClick={() => navigate('/spending')}
               className="text-emerald-500 text-sm font-bold flex items-center gap-1"
             >
               View All <ChevronRight size={16} />
             </button>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="bg-green-50 rounded-xl p-3 text-center">
               <div className="flex items-center justify-center gap-1 text-emerald-500 mb-1">
@@ -152,7 +145,7 @@ export default function HomePage() {
               <span className="text-xs text-gray-600 font-medium">Can Improve</span>
             </div>
           </div>
-          
+
           <div className="bg-gray-50 rounded-xl p-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 font-medium">Savings Rate</span>

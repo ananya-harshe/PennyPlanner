@@ -2,12 +2,15 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { Toaster } from 'sonner'
-import { Home, BookOpen, Trophy, User, Wallet, LogOut } from 'lucide-react'
+import { Home, BookOpen, Trophy, User, Wallet, LogOut, Settings } from 'lucide-react'
 import { AuthProvider, useAuth } from '@/store/authContext'
 import HomePage from '@/pages/HomePage'
 import DashboardPage from '@/pages/DashboardPage'
 import ChatbotPage from '@/pages/ChatbotPage'
 import QuestsPage from '@/pages/QuestsPage'
+import LearningPage from '@/pages/LearningPage'
+import SettingsPage from '@/pages/SettingsPage'
+import SpendingPage from '@/pages/SpendingPage'
 import LoginPage from '@/pages/LoginPage'
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api'
@@ -17,7 +20,7 @@ const BottomNav = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { logout, user } = useAuth()
-  
+
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
     { path: '/dashboard', icon: BookOpen, label: 'Dashboard' },
@@ -32,27 +35,24 @@ const BottomNav = () => {
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
-            className={`flex-1 py-4 flex flex-col items-center gap-1 ${
-              location.pathname === item.path 
-                ? 'text-emerald-500 border-b-4 border-emerald-500' 
-                : 'text-gray-600 hover:text-emerald-500'
-            } transition-colors`}
+            className={`flex-1 py-4 flex flex-col items-center gap-1 ${location.pathname === item.path
+              ? 'text-emerald-500 border-b-4 border-emerald-500'
+              : 'text-gray-600 hover:text-emerald-500'
+              } transition-colors`}
           >
             <item.icon size={24} />
             <span className="text-xs font-semibold">{item.label}</span>
           </button>
         ))}
-        {/* Logout Button */}
         <button
-          onClick={() => {
-            logout()
-            navigate('/login')
-          }}
-          title={`Logout (${user?.username})`}
-          className="flex-1 py-4 flex flex-col items-center gap-1 text-gray-600 hover:text-red-500 transition-colors"
+          onClick={() => navigate('/settings')}
+          className={`flex-1 py-4 flex flex-col items-center gap-1 ${location.pathname === '/settings'
+            ? 'text-emerald-500 border-b-4 border-emerald-500'
+            : 'text-gray-600 hover:text-emerald-500'
+            } transition-colors`}
         >
-          <LogOut size={24} />
-          <span className="text-xs font-semibold">Logout</span>
+          <Settings size={24} />
+          <span className="text-xs font-semibold">Settings</span>
         </button>
       </div>
     </nav>
@@ -120,6 +120,9 @@ function AppContent() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/quests" element={<QuestsPage />} />
+          <Route path="/spending" element={<SpendingPage />} />
+          <Route path="/learn" element={<LearningPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
         <BottomNav />
       </BrowserRouter>

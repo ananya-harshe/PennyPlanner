@@ -12,6 +12,7 @@ import quizRoutes from './routes/quiz.js';
 import progressRoutes from './routes/progress.js';
 import pennyRoutes from './routes/penny.js';
 import transactionRoutes from './routes/transactions.js';
+import userRoutes from './routes/users.js';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use('/api/quiz', quizRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/penny', pennyRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -52,8 +54,8 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(err.status || 500).json({ 
-    message: err.message || 'Internal server error' 
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal server error'
   });
 });
 

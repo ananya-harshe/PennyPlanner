@@ -1,17 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, AlertCircle } from 'lucide-react'
+import { Send, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { PennyMascot } from '@/components/PennyComponents'
 import { API_URL, getAuthHeaders } from '@/api/client'
-
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'
 
 export default function ChatbotPage() {
   const [messages, setMessages] = useState([
     {
       id: '1',
-      text: "Hi! I'm Penny, your financial advisor. Ask me anything about budgeting, saving, investing, or managing debt!",
+      text: "Hi! I'm Penny, your financial advisor frog! 🐸 Ask me anything about budgeting, saving, investing, or managing debt!",
       sender: 'bot',
       timestamp: new Date(),
     },
@@ -24,81 +21,33 @@ export default function ChatbotPage() {
     scrollToBottom()
   }, [messages])
 
-  useEffect(() => {
-    // Load a greeting message from Penny on page load
-    loadPennyGreeting()
-  }, [])
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const loadPennyGreeting = async () => {
+  const callPennyChat = async (userMessage) => {
     try {
-      const response = await fetch(`${API_URL}/penny/message?context=home`, {
-        headers: getAuthHeaders()
+      const response = await fetch(`${API_URL}/penny/chat`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ message: userMessage })
       })
-      const data = await response.json()
-      if (data.message) {
-        setMessages(prev => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            text: data.message,
-            sender: 'bot',
-            timestamp: new Date(),
-          },
-        ])
-      }
-    } catch (error) {
-      console.error('Failed to load greeting:', error)
-    }
-  }
-
-  const callGeminiAPI = async (userMessage) => {
-    if (!GEMINI_API_KEY) {
-      return "I need my API key configured! Add VITE_GEMINI_API_KEY to your .env file to use me."
-    }
-
-    try {
-      const response = await fetch(
-        `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `You are Penny, a friendly financial advisor frog 🐸. Give concise, practical financial advice in 1-2 sentences. User asked: ${userMessage}`,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              maxOutputTokens: 200,
-              temperature: 0.7,
-            },
-          }),
-        }
-      )
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
       }
 
       const data = await response.json()
-      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text
-      
-      if (!responseText) {
-        throw new Error('No response text received')
-      }
-      
-      return responseText
+      return data.response || "Ribbit! I'm thinking about that... 🐸"
     } catch (error) {
-      console.error('Gemini API error:', error)
-      return "I'm having trouble connecting to my AI brain right now. Try again in a moment!"
+      console.error('Penny chat error:', error)
+      // Fallback responses if API fails
+      const fallbacks = [
+        "Great question! The key to financial success is spending less than you earn. Try tracking your expenses for a week! 🐸",
+        "Ribbit! That's a smart thing to think about! Start by creating a simple budget - list your income and expenses. 🐸",
+        "I love that you're thinking about money! Remember: save first, spend second. Even small amounts add up! 🐸"
+      ]
+      return fallbacks[Math.floor(Math.random() * fallbacks.length)]
     }
   }
 
@@ -117,15 +66,15 @@ export default function ChatbotPage() {
     setIsLoading(true)
 
     try {
-      const botResponseText = await callGeminiAPI(input)
-      
+      const botResponseText = await callPennyChat(input)
+
       const botMessage = {
         id: (Date.now() + 1).toString(),
         text: botResponseText,
         sender: 'bot',
         timestamp: new Date(),
       }
-      
+
       setMessages(prev => [...prev, botMessage])
     } catch (error) {
       console.error('Error:', error)
@@ -142,40 +91,57 @@ export default function ChatbotPage() {
     }
   }
 
+  const quickQuestions = [
+    "How do I start saving?",
+    "What is a budget?",
+    "How do credit cards work?",
+    "Tips for investing?"
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-40 pt-24 flex flex-col">
+    <div className="min-h-screen bg-gray-50 pb-48 pt-24 flex flex-col">
       <PennyMascot message="Ask me anything about money! 💚" size="medium" animate />
 
-      {/* API Key Warning */}
-      {!GEMINI_API_KEY && (
-        <div className="mx-4 mt-4 bg-orange-100 border-2 border-orange-400 rounded-2xl p-4 flex gap-3">
-          <AlertCircle className="text-orange-600 flex-shrink-0 mt-1" size={20} />
-          <div>
-            <p className="text-sm font-bold text-orange-800">Gemini API Key Missing</p>
-            <p className="text-xs text-orange-700 mt-1">Add VITE_GEMINI_API_KEY to .env to enable AI responses</p>
-          </div>
+      {/* Quick Questions */}
+      <div className="px-4 mt-4">
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {quickQuestions.map((question, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setInput(question)
+              }}
+              className="flex-shrink-0 px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-full text-sm font-bold transition-colors flex items-center gap-1"
+            >
+              <Sparkles className="w-3 h-3" />
+              {question}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Chat Container */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4 mt-6">
+      <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4 mt-4">
         {messages.map(message => (
           <div
             key={message.id}
             className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
+            {message.sender === 'bot' && (
+              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0">
+                🐸
+              </div>
+            )}
             <div
-              className={`max-w-xs px-4 py-3 rounded-2xl font-bold ${
-                message.sender === 'user'
+              className={`max-w-xs px-4 py-3 rounded-2xl font-medium ${message.sender === 'user'
                   ? 'bg-emerald-500 text-white rounded-br-none'
-                  : 'bg-gray-200 text-gray-800 rounded-bl-none border-2 border-gray-300'
-              }`}
-            >
-              <p className="text-sm whitespace-wrap break-words">{message.text}</p>
-              <p
-                className={`text-xs mt-1 font-bold ${
-                  message.sender === 'user' ? 'text-emerald-100' : 'text-gray-600'
+                  : 'bg-white text-gray-800 rounded-bl-none border-2 border-gray-200 shadow-sm'
                 }`}
+            >
+              <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
+              <p
+                className={`text-xs mt-1 ${message.sender === 'user' ? 'text-emerald-100' : 'text-gray-500'
+                  }`}
               >
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
@@ -185,11 +151,14 @@ export default function ChatbotPage() {
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-200 text-gray-800 px-4 py-3 rounded-2xl rounded-bl-none border-2 border-gray-300">
-              <div className="flex gap-2">
-                <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-2 flex-shrink-0">
+              🐸
+            </div>
+            <div className="bg-white text-gray-800 px-4 py-3 rounded-2xl rounded-bl-none border-2 border-gray-200 shadow-sm">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
               </div>
             </div>
           </div>
@@ -197,16 +166,16 @@ export default function ChatbotPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-4 border-gray-200 px-4 py-4">
-        <div className="flex gap-3">
+      {/* Input - positioned above the bottom navigation */}
+      <div className="fixed bottom-20 left-0 right-0 bg-white border-t-4 border-gray-200 px-4 py-4 z-40">
+        <div className="flex gap-3 max-w-4xl mx-auto">
           <input
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask about budgeting, saving, investing..."
-            className="flex-1 border-2 border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-gray-800"
+            placeholder="Ask Penny about money..."
+            className="flex-1 border-2 border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-medium text-gray-800 placeholder-gray-400"
             disabled={isLoading}
           />
           <button
@@ -214,7 +183,7 @@ export default function ChatbotPage() {
             disabled={isLoading || !input.trim()}
             className="bg-emerald-500 text-white font-black rounded-2xl px-6 border-b-4 border-emerald-700 hover:bg-emerald-600 active:translate-y-1 active:border-b-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-5 h-5" />
           </button>
         </div>
       </div>

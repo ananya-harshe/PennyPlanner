@@ -1,9 +1,12 @@
 import express from 'express';
-import { getPennyTip, getPennyMessage } from '../controllers/pennyController.js';
+import { protect } from '../middleware/auth.js';
+import { getPennyTip, getPennyMessage, chatWithPennyController } from '../controllers/pennyController.js';
 
 const router = express.Router();
 
-router.get('/tip', getPennyTip);
+router.get('/tip', protect, getPennyTip);
 router.get('/message', getPennyMessage);
+router.post('/chat', protect, chatWithPennyController);
 
 export default router;
+

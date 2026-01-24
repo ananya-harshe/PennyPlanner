@@ -4,7 +4,7 @@ import Progress from '../models/Progress.js';
 export const getProgress = async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     const user = await User.findById(userId);
     const progress = await Progress.findOne({ user_id: userId });
 
@@ -19,6 +19,7 @@ export const getProgress = async (req, res) => {
       gems: user.gems,
       completed_lessons: user.completed_lessons,
       badges: progress?.badges || [],
+      xp_history: progress?.xp_history || [],
       last_active: user.last_active
     });
   } catch (error) {
