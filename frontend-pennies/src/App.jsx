@@ -7,6 +7,7 @@ import DashboardPage from '@/pages/DashboardPage'
 import ChatbotPage from '@/pages/ChatbotPage'
 import QuestsPage from '@/pages/QuestsPage'
 
+import LeaderboardPage from '@/pages/LeaderboardPage'
 import SettingsPage from '@/pages/SettingsPage'
 import ShopPage from '@/pages/ShopPage'
 import LoginPage from '@/pages/LoginPage'
@@ -25,38 +26,29 @@ const BottomNav = () => {
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
-    { path: '/dashboard', icon: BookOpen, label: 'Dashboard' },
+    { path: '/dashboard', icon: BookOpen, label: 'Dash' },
     { path: '/quests', icon: User, label: 'Quests' },
+    { path: '/leaderboard', icon: Trophy, label: 'Rank' },
     { path: '/shop', icon: ShoppingBag, label: 'Shop' },
-    { path: '/chatbot', icon: Trophy, label: 'Advice' },
+    { path: '/settings', icon: Settings, label: 'Settings' },
   ]
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-4 border-gray-200 z-50 lg:hidden">
-      <div className="max-w-4xl mx-auto px-4 flex justify-around items-center">
+      <div className="max-w-4xl mx-auto px-1 flex justify-around items-center">
         {navItems.map((item) => (
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
-            className={`flex-1 py-4 flex flex-col items-center gap-1 ${location.pathname === item.path
+            className={`flex-1 py-3 flex flex-col items-center gap-1 ${location.pathname === item.path
               ? 'text-emerald-500 border-b-4 border-emerald-500'
               : 'text-gray-600 hover:text-emerald-500'
               } transition-colors`}
           >
-            <item.icon size={24} />
-            <span className="text-xs font-semibold">{item.label}</span>
+            <item.icon size={22} />
+            <span className="text-[10px] font-bold">{item.label}</span>
           </button>
         ))}
-        <button
-          onClick={() => navigate('/settings')}
-          className={`flex-1 py-4 flex flex-col items-center gap-1 ${location.pathname === '/settings'
-            ? 'text-emerald-500 border-b-4 border-emerald-500'
-            : 'text-gray-600 hover:text-emerald-500'
-            } transition-colors`}
-        >
-          <Settings size={24} />
-          <span className="text-xs font-semibold">Settings</span>
-        </button>
       </div>
     </nav>
   )
@@ -135,6 +127,7 @@ function AppContent() {
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/chatbot" element={<ChatbotPage />} />
                   <Route path="/quests" element={<QuestsPage />} />
+                  <Route path="/leaderboard" element={<LeaderboardPage />} />
                   <Route path="/shop" element={<ShopPage />} />
 
                   <Route path="/settings" element={<SettingsPage />} />

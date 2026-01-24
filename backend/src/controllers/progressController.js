@@ -11,6 +11,7 @@ export const getProgress = async (req, res) => {
     res.json({
       user_id: user._id,
       username: user.username,
+      nickname: user.nickname,
       xp: user.xp,
       daily_xp: user.daily_xp,
       daily_goal: user.daily_goal,

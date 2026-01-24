@@ -5,7 +5,7 @@ import Quiz from '../models/Quiz.js';
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { daily_goal } = req.body;
+        const { daily_goal, nickname } = req.body;
 
         // Update Progress model where daily_goal is effectively stored/used
         // Note: User model also has daily_goal in the schema shown in view_file, 
@@ -16,6 +16,10 @@ export const updateProfile = async (req, res) => {
         if (daily_goal) {
             await User.findByIdAndUpdate(userId, { daily_goal });
             await Progress.findOneAndUpdate({ user_id: userId }, { daily_goal });
+        }
+
+        if (nickname) {
+            await User.findByIdAndUpdate(userId, { nickname });
         }
 
         res.json({ message: 'Profile updated successfully', daily_goal });
@@ -40,6 +44,19 @@ export const deleteAccount = async (req, res) => {
         // If we want to be thorough we could, but minimal req is delete account.
 
         res.json({ message: 'Account deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const getLeaderboard = async (req, res) => {
+    try {
+        const leaderboard = await User.find({})
+            .sort({ xp: -1 })
+            .limit(10)
+            .select('username nickname xp badges gems streak'); // Select fields to display
+
+        res.json(leaderboard);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
