@@ -76,7 +76,7 @@ export default function ChatbotPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {/* Navigation */}
       <nav className="bg-white shadow-lg border-b-4 border-gray-200">
         <div className={`${theme.spacing.container} py-4 flex justify-between items-center`}>
