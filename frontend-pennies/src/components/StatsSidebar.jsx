@@ -2,7 +2,7 @@ import React from 'react'
 import { Star, Flame } from 'lucide-react'
 import { PennyMascot } from './PennyComponents'
 
-export default function StatsSidebar({ user }) {
+export default function StatsSidebar({ user, onOpenChat }) {
     return (
         <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 p-8 space-y-8 bg-gray-50 overflow-y-auto">
             {/* Stats Section */}
@@ -30,6 +30,23 @@ export default function StatsSidebar({ user }) {
                     </div>
                     <span className="text-2xl font-black text-orange-500">{user?.streak || 0} days</span>
                 </div>
+
+                {/* Ask Penny Button (Desktop) */}
+                <button
+                    onClick={onOpenChat}
+                    className="w-full card-3d p-4 bg-gradient-to-r from-emerald-500 to-emerald-600 border-b-4 border-emerald-800 rounded-2xl flex items-center justify-between group hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white/20 p-2 rounded-xl text-2xl group-hover:rotate-12 transition-transform">
+                            🐸
+                        </div>
+                        <div className="text-left">
+                            <span className="block font-black text-white">Ask Penny</span>
+                            <span className="text-xs text-emerald-100 font-bold">AI Financial Advisor</span>
+                        </div>
+                    </div>
+                    <span className="bg-white/20 px-2 py-1 rounded-lg text-white font-bold text-sm">Chat</span>
+                </button>
             </div>
 
             {/* Mascot Advice */}
