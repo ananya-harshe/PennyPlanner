@@ -271,15 +271,15 @@ export default function DashboardPage() {
             <div className="bg-sky-500 rounded-2xl p-3">
               <CreditCard className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-2xl font-black text-gray-800">Recent Transactions</h3>
+            <h3 className="text-2xl font-black text-gray-800 text-left">Recent Transactions</h3>
           </div>
           {/* View All removed */}
         </div>
         <div className="space-y-4">
           {data?.recent?.slice(0, 5).map((transaction) => (
             <div key={transaction._id} className="flex items-center justify-between py-3 border-b-2 border-gray-200 last:border-b-0">
-              <div>
-                <p className="font-black text-gray-800">{transaction.description}</p>
+              <div className="text-left">
+                <p className="font-black text-gray-800 text-left">{transaction.description}</p>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-gray-500 uppercase">{transaction.category}</span>
                   <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-500">{new Date(transaction.date).toLocaleDateString()}</span>

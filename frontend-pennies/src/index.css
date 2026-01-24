@@ -4,6 +4,19 @@
 @tailwind components;
 @tailwind utilities;
 
+<<<<<<< Updated upstream
+=======
+/* @utility corner-scoop {
+  corner-shape: scoop;
+} */
+
+.macondo-regular {
+  /* font-family: "Macondo", cursive; */
+  font-weight: 400;
+  font-style: normal;
+}
+
+>>>>>>> Stashed changes
 @keyframes bounceIn {
   0% {
     transform: scale(0.3);
@@ -30,16 +43,48 @@
 
 * {
   @apply antialiased;
+<<<<<<< Updated upstream
   font-family: 'Nunito', system-ui, sans-serif;
 }
 
 html {
   font-family: 'Nunito', system-ui, sans-serif;
+=======
+  font-family: "Nunito", sans-serif;
+  text-decoration: none;
+}
+
+html {
+  font-family: "Nunito", sans-serif;
+}
+
+:root {
+  --baltic-blue: #22577a;
+  --tropical-teal: #38a3a5;
+  --emerald: #57cc99;
+  --light-green: #80ed99;
+  --tea-green: #c7f9cc;
+>>>>>>> Stashed changes
 }
 
 html,
 body {
+<<<<<<< Updated upstream
   @apply m-0 p-0 w-full h-full bg-gray-100;
+=======
+  background-color: var(--tea-green);
+  /* background-image: url('assets/skyblue.jpg'); */
+  /* background-size: cover; */
+  /* background-attachment: fixed; */
+  @apply m-0 p-0 w-full h-full;
+}
+
+header {
+  background-color: var(--light-green);
+  /* background-image: url('assets/cloud.png'); */
+  /* background-size: cover; */
+  padding: 1rem 0;
+>>>>>>> Stashed changes
 }
 
 /* Global background */
@@ -65,7 +110,14 @@ body {
 
 /* Cards with rounded Duolingo style */
 .card-3d {
+<<<<<<< Updated upstream
   @apply rounded-[32px] bg-white shadow-lg border-2 border-gray-200 overflow-hidden;
+=======
+  @apply rounded-[32px] bg-white bg-opacity-30 backdrop-blur-md shadow-lg border-2 border-emerald-200 border-opacity-50 overflow-hidden;
+  /* Mask removed to allow border to be visible at corners */
+  /* Support for older webkit */
+
+>>>>>>> Stashed changes
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
@@ -81,7 +133,11 @@ h3,
 h4,
 h5,
 h6 {
+<<<<<<< Updated upstream
   @apply font-black text-gray-800;
+=======
+  @apply font-black text-gray-800 text-center;
+>>>>>>> Stashed changes
 }
 
 h1 {
@@ -179,6 +235,20 @@ p {
   @apply text-gray-600 font-bold hover:text-emerald-500 transition-colors duration-200;
 }
 
+<<<<<<< Updated upstream
+=======
+/* Stats pill styling */
+.stat-pill {
+  @apply inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full border-2 border-gray-300 font-bold text-gray-800 text-center;
+}
+
+/* Label and span text centering */
+span,
+label {
+  @apply text-center;
+}
+
+>>>>>>> Stashed changes
 /* Progress bar */
 .progress-bar-duolingo {
   @apply w-full bg-gray-200 rounded-full h-3 overflow-hidden border-2 border-gray-300;
@@ -219,6 +289,33 @@ p {
   @apply transition-transform duration-200 hover:scale-105;
 }
 
+<<<<<<< Updated upstream
+=======
+/* Icon colors */
+.icon-green {
+  @apply text-emerald-500;
+}
+
+.icon-blue {
+  @apply text-sky-500;
+}
+
+.icon-red {
+  @apply text-red-500;
+}
+
+.icon-orange {
+  @apply text-orange-500;
+}
+
+footer {
+  background-image: url('assets/grassbottom.jpg');
+  background-size: cover;
+  padding: 1rem 0;
+  color: white;
+}
+
+>>>>>>> Stashed changes
 /* Quest Completion Animations */
 @keyframes fadeIn {
   from {

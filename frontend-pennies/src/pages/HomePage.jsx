@@ -201,8 +201,8 @@ export default function HomePage() {
               🐸
             </div>
             <div className="flex-1 text-left">
-              <span className="font-bold text-gray-700 block">Ask Penny for a Tip</span>
-              <span className="text-xs text-gray-500">Get personalized money advice!</span>
+              <span className="font-bold text-gray-700 block text-left">Ask Penny for a Tip</span>
+              <span className="text-xs text-gray-500 text-left block">Get personalized money advice!</span>
             </div>
             <Sparkles size={20} className="text-yellow-500" />
           </button>
@@ -213,7 +213,7 @@ export default function HomePage() {
           {transactions && (
             <div className="card-3d p-6 border-4 border-gray-200" data-testid="transactions-card">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-700">Your Spending Habits</h3>
+                <h3 className="font-bold text-gray-700 text-left">Your Spending Habits</h3>
                 <button
                   onClick={() => navigate('/dashboard')}
                   className="text-emerald-500 text-sm font-bold flex items-center gap-1"
