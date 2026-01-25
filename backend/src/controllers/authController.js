@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
+import { generateAndPostPurchases } from '../gemini/genai.js';
 import { isDbConnected } from '../config/database.js';
 
 const generateToken = (id) => {
@@ -33,24 +34,22 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const nessieRes = await axios.post(`http://api.nessieisreal.com/customers?key=${process.env.NESSIE}`, {
-      first_name: username, 
-      last_name: "Customer",
-      address: {
-        street_number: "123",
-        street_name: "Main St",
-        city: "New York",
-        state: "NY",
-        zip: "10001"
-      }
+    const nessieRes = await axios.post(`http://api.nessieisreal.com/customers/${process.env.CUSTOMER}/accounts?key=${process.env.NESSIE}`, {
+      "type": "Credit Card",
+      "nickname": "PennyPlanner Account",
+      "rewards": 0,
+      "balance": 0
     });
 
-    const nessieId = nessieRes.data.objectCreated._id;
-    console.log(`Nessie id: ${nessieId}`)
+    const accountId = nessieRes.data.objectCreated._id;
+    console.log(`Nessie Account id: ${accountId}`)
+
+    // Generate mock transactions using Gemini and post to Nessie
+    await generateAndPostPurchases(accountId);
 
     // Create user
     user = await User.create({
-      accountID: nessieId,
+      accountID: accountId,
       username,
       email,
       password,

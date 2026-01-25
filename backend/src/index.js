@@ -3,6 +3,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+
+// LOAD ENV VARS FIRST - BEFORE ANYTHING ELSE
+dotenv.config();
+
 import { connectDB } from './config/database.js';
 
 // Import routes
@@ -15,8 +19,6 @@ import transactionRoutes from './routes/transactions.js';
 import userRoutes from './routes/users.js';
 import questRoutes from './routes/quests.js';
 import goalRoutes from './routes/goalRoutes.js'; // New Goal Routes
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
