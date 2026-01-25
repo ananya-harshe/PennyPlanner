@@ -18,6 +18,7 @@ import pennyRoutes from './routes/penny.js';
 import transactionRoutes from './routes/transactions.js';
 import userRoutes from './routes/users.js';
 import questRoutes from './routes/quests.js';
+import dailyQuestRoutes from './routes/dailyQuests.js';
 import goalRoutes from './routes/goalRoutes.js'; // New Goal Routes
 
 const app = express();
@@ -62,12 +63,17 @@ app.use('/api/penny', pennyRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/quests', questRoutes);
+app.use('/api/daily-quests', dailyQuestRoutes);
 app.use('/api/goals', goalRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Backend is running!' });
 });
+
+// Daily quest cleanup - run every hour
+import { cleanupExpiredQuests } from './controllers/dailyQuestController.js';
+setInterval(cleanupExpiredQuests, 60 * 60 * 1000); // Every hour
 
 // 404 handler
 app.use((req, res) => {
