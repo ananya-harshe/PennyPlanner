@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const [pennyMessage, setPennyMessage] = useState(null)
   const [pennyAdvice, setPennyAdvice] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [selectedGoal, setSelectedGoal] = useState(null)
+  const [addMoneyAmount, setAddMoneyAmount] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,6 +110,41 @@ export default function DashboardPage() {
     fetchData()
   }, [user?.accountID])
 
+  const handleAddMoneyToGoal = async (goalId) => {
+    if (!addMoneyAmount || parseFloat(addMoneyAmount) <= 0) {
+      toast.error('Please enter a valid amount')
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/goals/${goalId}/add-money`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify({ amount: parseFloat(addMoneyAmount) })
+      })
+
+      if (response.ok) {
+        toast.success(`Added $${addMoneyAmount} to your goal! 🎉`)
+        setAddMoneyAmount('')
+        setSelectedGoal(null)
+        
+        // Refresh goals
+        const goalsResponse = await fetch(`${API_URL}/goals`, { headers: getAuthHeaders() })
+        const goalsData = await goalsResponse.json()
+        setGoalsData(goalsData.data)
+      } else {
+        const error = await response.json()
+        toast.error(error.message || 'Failed to add money to goal')
+      }
+    } catch (err) {
+      console.error('Error adding money to goal:', err)
+      toast.error('Failed to add money to goal')
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
@@ -162,6 +199,12 @@ export default function DashboardPage() {
                   <span className="text-sm font-black text-indigo-500">{Math.round((goal.current_amount / goal.target_amount) * 100)}%</span>
                 </div>
                 <Progress value={(goal.current_amount / goal.target_amount) * 100} className="h-3" />
+                <button
+                  onClick={() => setSelectedGoal(goal._id)}
+                  className="mt-4 w-full bg-indigo-100 text-indigo-600 font-bold py-2 rounded-xl hover:bg-indigo-200 transition-colors text-sm"
+                >
+                  + Add Money
+                </button>
               </div>
             ))}
           </div>
@@ -179,6 +222,45 @@ export default function DashboardPage() {
       </div>
 
       {showAddGoal && <AddGoalModal onClose={() => setShowAddGoal(false)} />}
+
+      {/* Add Money to Goal Modal */}
+      {selectedGoal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl">
+            <h2 className="text-2xl font-black text-gray-800 mb-4">Add Money to Goal</h2>
+            <p className="text-gray-600 text-sm mb-6">How much would you like to add?</p>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-gray-700 mb-2">Amount</label>
+              <input
+                type="number"
+                value={addMoneyAmount}
+                onChange={(e) => setAddMoneyAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 text-lg font-bold"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setSelectedGoal(null)
+                  setAddMoneyAmount('')
+                }}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleAddMoneyToGoal(selectedGoal)}
+                className="flex-1 px-4 py-3 bg-indigo-500 text-white font-bold rounded-xl hover:bg-indigo-600 transition-colors"
+              >
+                Add Money
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="card-3d p-6 border-4 border-gray-200 mb-6">
         <h2 className="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
@@ -276,7 +358,11 @@ export default function DashboardPage() {
               <TrendingDown className="w-6 h-6 text-white" />
             </div>
           </div>
-          <p className="text-3xl font-black text-red-500">${data?.total?.toFixed(2) || '0.00'}</p>
+          <p className="text-3xl font-black text-red-500">
+            ${recentTransactions && recentTransactions.length > 0 
+              ? recentTransactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0).toFixed(2)
+              : '0.00'}
+          </p>
           <p className="text-sm font-bold text-gray-600 mt-2">This month</p>
         </div>
       </div>

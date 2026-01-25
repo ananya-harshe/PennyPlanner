@@ -62,6 +62,7 @@ app.use('/api/penny', pennyRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/quests', questRoutes);
+app.use('/api/goals', goalRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
