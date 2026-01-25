@@ -1,21 +1,35 @@
-# PennyPlanner
+# PennyWise
 
-A full-stack application for financial planning with React frontend and Python backend.
+PennyWise is a full-stack web application that gamifies financial literacy for college students. Users complete quests, earn XP, track real spending with the **Capital One Nessie API**, and redeem rewards like gift cards or small banking perks. Built for accessibility, engagement, and real-world impact.
+
+---
+
+## Tech Stack
+
+- **Frontend:** React + Vite, Zustand for state management  
+- **Backend:** FastAPI (Python)  
+- **Database:** MongoDB Atlas  
+- **Bank Integration:** Capital One Nessie API  
+- **AI:** Google Gemini for personalized guidance  
+
+---
 
 ## Backend Setup
 
-The backend is built with FastAPI (Python web framework) and uses MongoDB for data storage.
+The backend is built with **FastAPI** and uses MongoDB for data persistence.
 
 ### Prerequisites
-- Python 3.8 or higher
-- MongoDB database
+
+- Python 3.8 or higher  
+- MongoDB database  
 - Virtual environment (recommended)
 
 ### Installation
 
 1. Navigate to the backend directory:
-   ```bash
-   cd backend
+
+```bash
+cd backend
    ```
 
 2. Create and activate a virtual environment:
