@@ -1,5 +1,7 @@
 import { generatePennyTip, generatePennyMessage, chatWithPenny, generateSpendingInsights, analyzeFuturePlanning } from '../services/geminiService.js';
 import Transaction from '../models/Transaction.js';
+import User from '../models/User.js';
+import axios from 'axios';
 
 export const getPennyTip = async (req, res) => {
   try {
@@ -79,14 +81,54 @@ export const getFuturePlanningAnalysis = async (req, res) => {
     let transactions = [];
 
     if (userId) {
-      // Fetch 60 days of history for analysis
-      const sixtyDaysAgo = new Date();
-      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+      try {
+        // Fetch user to get Nessie accountID
+        const user = await User.findById(userId);
+        if (!user || !user.accountID) {
+          console.warn('⚠️ User has no accountID, falling back to local database');
+          // Fallback to local database
+          const sixtyDaysAgo = new Date();
+          sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-      transactions = await Transaction.find({
-        user_id: userId,
-        date: { $gte: sixtyDaysAgo }
-      }).sort({ date: -1 });
+          transactions = await Transaction.find({
+            user_id: userId,
+            date: { $gte: sixtyDaysAgo }
+          }).sort({ date: -1 });
+        } else {
+          // Fetch from Nessie API
+          try {
+            const nessieUrl = `http://api.nessieisreal.com/accounts/${user.accountID}/purchases?key=${process.env.NESSIE}`;
+            const response = await axios.get(nessieUrl);
+            
+            if (response.data && Array.isArray(response.data)) {
+              console.log(`✅ Fetched ${response.data.length} transactions from Nessie for future planning`);
+              
+              // Transform Nessie purchases to match local transaction format
+              transactions = response.data.map(purchase => ({
+                _id: purchase._id,
+                description: purchase.description || purchase.merchant_id,
+                amount: purchase.amount || 0,
+                category: purchase.type || 'Uncategorized',
+                date: purchase.purchase_date ? new Date(purchase.purchase_date) : new Date(),
+                user_id: userId
+              })).sort((a, b) => b.date - a.date);
+            }
+          } catch (nessieError) {
+            console.error('⚠️ Error fetching from Nessie API:', nessieError.message);
+            // Fallback to local database
+            const sixtyDaysAgo = new Date();
+            sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+            transactions = await Transaction.find({
+              user_id: userId,
+              date: { $gte: sixtyDaysAgo }
+            }).sort({ date: -1 });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user or transactions:', error);
+        // Silent fallback - still try to get analysis with empty transactions
+      }
     }
 
     const analysis = await analyzeFuturePlanning(transactions, userId);

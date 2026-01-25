@@ -444,6 +444,8 @@ Return JSON only:
     const years = [1, 3, 5];
     const projections = [];
 
+    console.log(`💰 [PROJECTIONS] Calculating wealth projections based on $${monthlyContribution}/month potential savings`);
+
     // Helper for compound interest with monthly contributions
     // FV = P * (((1 + r)^n - 1) / r)
     // P = monthly payment, r = monthly interest rate, n = number of months
@@ -461,17 +463,25 @@ Return JSON only:
     };
 
     years.forEach(year => {
+      const cashAmount = Math.round(monthlyContribution * 12 * year);
+      const hysAmount = Math.round(calculateFV(monthlyContribution, 0.04, year));
+      const marketAmount = Math.round(calculateFV(monthlyContribution, 0.07, year));
+      const lumpSumAmount = Math.round(calculateLumpSum(monthlyContribution * 12, 0.07, year));
+
       projections.push({
         year: year,
-        cash_kept: Math.round(monthlyContribution * 12 * year),
-        dca_hys_4pct: Math.round(calculateFV(monthlyContribution, 0.04, year)),
-        dca_market_7pct: Math.round(calculateFV(monthlyContribution, 0.07, year)),
-        lump_sum_market_7pct: Math.round(calculateLumpSum(monthlyContribution * 12, 0.07, year)) // Comparison: If they invested 1 year's worth today
+        cash_kept: cashAmount,
+        dca_hys_4pct: hysAmount,
+        dca_market_7pct: marketAmount,
+        lump_sum_market_7pct: lumpSumAmount
       });
+
+      console.log(`  Year ${year}: Cash=$${cashAmount} | HYS(4%)=$${hysAmount} | Market(7%)=$${marketAmount} | LumpSum=$${lumpSumAmount}`);
     });
 
     const result = {
       ...analysis,
+      monthly_contribution: monthlyContribution,
       projections
     };
 
