@@ -107,6 +107,7 @@ export const login = async (req, res) => {
       token,
       user: {
         id: user._id,
+        accountID: user.accountID,
         username: user.username,
         email: user.email,
         xp: user.xp,
@@ -136,6 +137,7 @@ export const getMe = async (req, res) => {
       success: true,
       data: {
         id: user._id,
+        accountID: user.accountID,
         username: user.username,
         email: user.email,
         xp: user.xp,
