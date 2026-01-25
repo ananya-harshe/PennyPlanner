@@ -126,7 +126,7 @@ export default function LoginPage() {
       <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-emerald-600 mb-2">💰 PennyPlanner</h1>
+          <h1 className="text-4xl font-bold text-emerald-600 mb-2">💰 PennyWise</h1>
           <p className="text-gray-600">Learn money management the fun way!</p>
         </div>
 

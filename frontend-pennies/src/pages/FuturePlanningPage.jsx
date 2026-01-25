@@ -160,14 +160,14 @@ export default function FuturePlanningPage() {
                 </div>
             </div>
 
-            {/* What If Interactive Section */}
+            {/* What If Interactive Section — up to 2 rows of habits */}
             {data?.recurring_items?.length > 0 && (
-                <div className="bg-gradient-to-br from-orange-400 to-pink-500 rounded-3xl p-8 text-white text-center">
-                    <h2 className="text-2xl font-black mb-4">🤔 What If You Invested Instead?</h2>
-                    <p className="text-orange-100 mb-6">Tap a habit to see what it could become in 5 years if you invested it instead!</p>
+                <div className="bg-gradient-to-br from-orange-400 to-pink-500 rounded-2xl p-5 text-white text-center">
+                    <h2 className="text-lg font-black mb-2">🤔 What If You Invested Instead?</h2>
+                    <p className="text-orange-100 text-sm mb-4 leading-snug">Tap a habit to see what it could become in 5 years if you invested it instead!</p>
 
-                    <div className="flex justify-center gap-4">
-                        {data.recurring_items.slice(0, 3).map((item, i) => {
+                    <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
+                        {data.recurring_items.slice(0, 4).map((item, i) => {
                             // Simple 5-year projection at 7%
                             const monthlyAmount = item.monthly_cost || item.amount * 30;
                             const fiveYearValue = Math.round(monthlyAmount * ((Math.pow(1 + 0.07 / 12, 60) - 1) / (0.07 / 12)));
@@ -176,9 +176,9 @@ export default function FuturePlanningPage() {
                                 <button
                                     key={i}
                                     onClick={() => setPopup({ name: item.name, value: fiveYearValue })}
-                                    className="bg-white/20 hover:bg-white/30 px-5 py-3 rounded-2xl font-bold transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
+                                    className="bg-white/20 hover:bg-white/30 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center min-w-0"
                                 >
-                                    {item.name} → ${fiveYearValue.toLocaleString()}?
+                                    <span className="truncate">{item.name} → ${fiveYearValue.toLocaleString()}?</span>
                                 </button>
                             );
                         })}
