@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Star, Swords, Zap, Activity, Clock, Flame } from 'lucide-react'
+import { Star, Swords, Zap, Activity, Clock, Flame, RotateCcw } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { toast } from 'sonner'
 import { PennyMascot } from '@/components/PennyComponents'
@@ -354,7 +354,7 @@ export default function QuestsPage() {
   const fetchDailyQuests = async () => {
     try {
       setDailyLoading(true)
-      
+
       // First, trigger progress update on backend (fetches from Nessie)
       try {
         await fetch(`${API_URL}/daily-quests/update-progress`, {
@@ -364,11 +364,11 @@ export default function QuestsPage() {
       } catch (error) {
         console.warn('Note: Progress update failed, displaying cached data')
       }
-      
+
       // Then fetch the updated quests
       const response = await fetch(`${API_URL}/daily-quests`, { headers: getAuthHeaders() })
       const data = await response.json()
-      
+
       if (data.success) {
         setDailyQuests(data.data)
         updateTimeRemaining()
@@ -384,11 +384,11 @@ export default function QuestsPage() {
     const now = new Date()
     const endOfDay = new Date()
     endOfDay.setHours(23, 59, 59, 999)
-    
+
     const diff = endOfDay - now
     const hours = Math.floor(diff / (1000 * 60 * 60))
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-    
+
     setTimeRemaining(`${hours}h ${minutes}m`)
   }
 
@@ -399,13 +399,13 @@ export default function QuestsPage() {
         headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
       })
       const result = await response.json()
-      
+
       if (result.success) {
         toast.success(`Completed! +${result.xp_earned} XP 🎉`)
         setGainedXP(result.xp_earned)
         setShowAnimation(true)
         setTotalXP(result.new_total_xp)
-        
+
         // Refresh daily quests
         fetchDailyQuests()
         refreshUser()
@@ -415,6 +415,28 @@ export default function QuestsPage() {
     } catch (error) {
       console.error('Error completing daily quest:', error)
       toast.error('Failed to complete daily quest')
+    }
+  }
+
+  const handleResetQuests = async () => {
+    try {
+      const response = await fetch(`${API_URL}/quests/reset`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      })
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(result.message)
+        setQuests([])
+        // Fetch new quests
+        fetchQuests()
+      } else {
+        toast.error('Failed to reset quests')
+      }
+    } catch (error) {
+      console.error('Error resetting quests:', error)
+      toast.error('Error resetting quests')
     }
   }
 
@@ -523,9 +545,8 @@ export default function QuestsPage() {
           ) : (
             <div className="space-y-3">
               {dailyQuests.map(quest => (
-                <div key={quest._id} className={`card-3d p-4 border-4 ${
-                  quest.status === 'completed' ? 'border-green-200 bg-green-50' : 'border-orange-200'
-                }`}>
+                <div key={quest._id} className={`card-3d p-4 border-4 ${quest.status === 'completed' ? 'border-green-200 bg-green-50' : 'border-orange-200'
+                  }`}>
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
                       <h3 className="text-base font-black text-gray-800">{quest.title}</h3>
@@ -533,9 +554,8 @@ export default function QuestsPage() {
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
                           <div
-                            className={`h-full rounded-full transition-all ${
-                              quest.status === 'completed' ? 'bg-green-500' : 'bg-orange-500'
-                            }`}
+                            className={`h-full rounded-full transition-all ${quest.status === 'completed' ? 'bg-green-500' : 'bg-orange-500'
+                              }`}
                             style={{ width: `${Math.min((quest.progress / quest.target) * 100, 100)}%` }}
                           />
                         </div>
@@ -555,11 +575,10 @@ export default function QuestsPage() {
                       ✓ Completed
                     </div>
                   ) : quest.status === 'expired' ? (
-                    <div className={`py-2 px-3 rounded-xl text-center font-bold text-sm ${
-                      quest.requirement_type === 'transaction_amount' 
-                        ? 'bg-red-100 text-red-700' 
+                    <div className={`py-2 px-3 rounded-xl text-center font-bold text-sm ${quest.requirement_type === 'transaction_amount'
+                        ? 'bg-red-100 text-red-700'
                         : 'bg-gray-100 text-gray-700'
-                    }`}>
+                      }`}>
                       {quest.requirement_type === 'transaction_amount' ? '✗ Failed' : '✗ Expired'}
                     </div>
                   ) : null}
@@ -574,9 +593,19 @@ export default function QuestsPage() {
             <Swords className="text-red-500" />
             Active Quests
           </h2>
-          <span className="text-xs font-bold bg-gray-200 text-gray-600 px-3 py-1 rounded-full">
-            {quests.length} Remaining
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold bg-gray-200 text-gray-600 px-3 py-1 rounded-full">
+              {quests.length} Remaining
+            </span>
+            <button
+              onClick={handleResetQuests}
+              className="btn-3d-orange flex items-center gap-1 text-xs px-3 py-1"
+              title="Reset quests for testing"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset
+            </button>
+          </div>
         </div>
       </div>
 

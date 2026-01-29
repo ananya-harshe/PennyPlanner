@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, PieChart as PieChartIcon, CreditCard, Wallet, Loader2, AlertCircle, Target, Plus, PiggyBank } from 'lucide-react'
+import { TrendingUp, TrendingDown, PieChart as PieChartIcon, CreditCard, Wallet, Loader2, AlertCircle, Target, Plus, PiggyBank, Trash2 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts'
 import { toast } from 'sonner'
 import axios from 'axios'
@@ -76,11 +76,11 @@ export default function DashboardPage() {
               `${API_URL}/transactions/nessie/${user.accountID}`,
               { headers: getAuthHeaders() }
             );
-            
+
             console.log('📊 Response status:', purchasesResponse.status);
             const responseData = await purchasesResponse.json();
             console.log('📊 Response data:', responseData);
-            
+
             if (purchasesResponse.ok) {
               const purchases = Array.isArray(responseData) ? responseData : responseData.data || [];
               console.log('✅ Processed purchases:', purchases);
@@ -130,7 +130,7 @@ export default function DashboardPage() {
         toast.success(`Added $${addMoneyAmount} to your goal! 🎉`)
         setAddMoneyAmount('')
         setSelectedGoal(null)
-        
+
         // Refresh goals
         const goalsResponse = await fetch(`${API_URL}/goals`, { headers: getAuthHeaders() })
         const goalsData = await goalsResponse.json()
@@ -142,6 +142,31 @@ export default function DashboardPage() {
     } catch (err) {
       console.error('Error adding money to goal:', err)
       toast.error('Failed to add money to goal')
+    }
+  }
+
+  const handleDeleteGoal = async (goalId) => {
+    if (!window.confirm('Are you sure you want to delete this goal?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/goals/${goalId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      })
+
+      if (response.ok) {
+        toast.success('Goal deleted successfully! 🗑️')
+        // Refresh goals
+        const goalsResponse = await fetch(`${API_URL}/goals`, { headers: getAuthHeaders() })
+        const goalsData = await goalsResponse.json()
+        setGoalsData(goalsData.data)
+      } else {
+        toast.error('Failed to delete goal')
+      }
+    } catch (e) {
+      toast.error('Failed to delete goal')
     }
   }
 
@@ -199,12 +224,21 @@ export default function DashboardPage() {
                   <span className="text-sm font-black text-indigo-500">{Math.round((goal.current_amount / goal.target_amount) * 100)}%</span>
                 </div>
                 <Progress value={(goal.current_amount / goal.target_amount) * 100} className="h-3" />
-                <button
-                  onClick={() => setSelectedGoal(goal._id)}
-                  className="mt-4 w-full bg-indigo-100 text-indigo-600 font-bold py-2 rounded-xl hover:bg-indigo-200 transition-colors text-sm"
-                >
-                  + Add Money
-                </button>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => setSelectedGoal(goal._id)}
+                    className="flex-1 bg-indigo-100 text-indigo-600 font-bold py-2 rounded-xl hover:bg-indigo-200 transition-colors text-sm"
+                  >
+                    + Add Money
+                  </button>
+                  <button
+                    onClick={() => handleDeleteGoal(goal._id)}
+                    className="bg-red-50 text-red-500 p-2 rounded-xl hover:bg-red-100 transition-colors"
+                    title="Delete Goal"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -229,7 +263,7 @@ export default function DashboardPage() {
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl">
             <h2 className="text-2xl font-black text-gray-800 mb-4">Add Money to Goal</h2>
             <p className="text-gray-600 text-sm mb-6">How much would you like to add?</p>
-            
+
             <div className="mb-6">
               <label className="block text-sm font-bold text-gray-700 mb-2">Amount</label>
               <input
@@ -359,7 +393,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <p className="text-3xl font-black text-red-500">
-            ${recentTransactions && recentTransactions.length > 0 
+            ${recentTransactions && recentTransactions.length > 0
               ? recentTransactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0).toFixed(2)
               : '0.00'}
           </p>
@@ -414,9 +448,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <p
-                  className={`font-black text-right ${
-                    transaction.type === 'credit' ? 'text-emerald-500' : 'text-red-500'
-                  }`}
+                  className={`font-black text-right ${transaction.type === 'credit' ? 'text-emerald-500' : 'text-red-500'
+                    }`}
                 >
                   {transaction.type === 'credit' ? '+' : '-'}${parseFloat(transaction.amount || 0).toFixed(2)}
                 </p>
