@@ -16,6 +16,7 @@ export default function AddGoalModal({ onClose }) {
 
         setLoading(true)
         try {
+            console.log('📍 Creating goal with:', { title, target_amount: parseFloat(amount) })
             const response = await fetch(`${API_URL}/goals`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
@@ -28,6 +29,7 @@ export default function AddGoalModal({ onClose }) {
             })
 
             const data = await response.json()
+            console.log('📍 Response from backend:', data)
 
             if (data.success) {
                 toast.success("Goal created successfully!")
@@ -42,10 +44,11 @@ export default function AddGoalModal({ onClose }) {
 
                 onClose()
             } else {
+                console.error('❌ Error response:', data)
                 toast.error(data.error || "Failed to create goal")
             }
         } catch (error) {
-            console.error(error)
+            console.error('❌ Error creating goal:', error)
             toast.error("Failed to create goal")
         } finally {
             setLoading(false)

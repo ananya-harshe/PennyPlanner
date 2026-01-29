@@ -2,6 +2,7 @@ import Quest from '../models/Quest.js';
 import Transaction from '../models/Transaction.js';
 import { generateProceduralQuests } from '../services/geminiService.js';
 import User from '../models/User.js';
+import axios from 'axios';
 
 export const getQuests = async (req, res) => {
     try {
@@ -30,11 +31,47 @@ export const getQuests = async (req, res) => {
         if (activeQuests.length === 0) {
             console.log('🔄 No active quests found. Regenerating batch...');
 
-            // Fetch recent transactions for context
+            // Fetch recent transactions for context from Nessie API
             const txStart = Date.now();
-            const transactions = await Transaction.find({ user_id: userId })
-                .sort({ date: -1 })
-                .limit(20);
+            let transactions = [];
+
+            // Get user to fetch accountID
+            const user = await User.findById(userId);
+            if (!user || !user.accountID) {
+                console.warn('⚠️  User has no accountID, falling back to local database');
+                transactions = await Transaction.find({ user_id: userId })
+                    .sort({ date: -1 })
+                    .limit(20);
+            } else {
+                // Fetch from Nessie API
+                try {
+                    const nessieUrl = `http://api.nessieisreal.com/accounts/${user.accountID}/purchases?key=${process.env.NESSIE}`;
+                    console.log(`📍 Fetching Nessie transactions for quest generation...`);
+                    const response = await axios.get(nessieUrl);
+
+                    if (response.data && Array.isArray(response.data)) {
+                        // Transform Nessie purchases to match expected transaction format
+                        // Note: For quest generation, we use description as the category to match dashboard behavior
+                        // This allows quests to reference specific merchant/transaction types
+                        transactions = response.data.slice(0, 20).map(purchase => ({
+                            description: purchase.description || purchase.merchant_id || 'Purchase',
+                            amount: parseFloat(purchase.amount) || 0,
+                            category: purchase.description || purchase.merchant_id || purchase.type || 'general',
+                            date: purchase.purchase_date ? new Date(purchase.purchase_date) : new Date(),
+                            type: 'expense'
+                        }));
+                        console.log(`✅ Fetched ${transactions.length} transactions from Nessie for quest generation`);
+                        console.log(`📊 Sample categories: ${transactions.slice(0, 3).map(t => t.category).join(', ')}`);
+                    }
+                } catch (nessieError) {
+                    console.error('⚠️  Error fetching from Nessie API:', nessieError.message);
+                    // Fallback to local database if Nessie fails
+                    transactions = await Transaction.find({ user_id: userId })
+                        .sort({ date: -1 })
+                        .limit(20);
+                    console.log(`📦 Using ${transactions.length} transactions from local database as fallback`);
+                }
+            }
             console.log(`⏱️  [TRANSACTIONS] Fetched ${transactions.length} transactions in ${Date.now() - txStart}ms`);
 
             // Generate procedural quests via Gemini
@@ -115,6 +152,29 @@ export const completeQuest = async (req, res) => {
         });
 
     } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Reset quests (for testing - deletes all active quests to force regeneration)
+export const resetQuests = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const result = await Quest.deleteMany({
+            user_id: userId,
+            status: 'active'
+        });
+
+        console.log(`🔄 Reset ${result.deletedCount} active quests for user ${userId}`);
+
+        res.json({
+            success: true,
+            message: `Successfully reset ${result.deletedCount} quests. New quests will be generated on next fetch.`,
+            deletedCount: result.deletedCount
+        });
+    } catch (error) {
+        console.error('❌ Error resetting quests:', error);
         res.status(500).json({ message: error.message });
     }
 };
