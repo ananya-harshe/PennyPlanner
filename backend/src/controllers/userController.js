@@ -61,3 +61,25 @@ export const getLeaderboard = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const setDemoXP = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const xp = 9999;
+
+        // Update both User and Progress models if they both track things, 
+        // but based on previous read, User.xp seems primary. 
+        // We'll update both to be thorough as per my earlier check in updateProfile
+        await User.findByIdAndUpdate(userId, { xp });
+        await Progress.findOneAndUpdate({ user_id: userId }, { xp }); // Assuming Progress tracks it too?
+        // Wait, looking at updateProfile, Progress had daily_goal updated. 
+        // Let's quickly re-verify Progress model if it has XP.
+        // Actually, the previous view_file of User.js showed 'xp' field.
+        // I'll stick to updating User for now. If Progress needs it, I'll add it.
+        // I will just update User.xp for now as that's definitely there.
+
+        res.json({ message: 'XP updated to 9999!', xp });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

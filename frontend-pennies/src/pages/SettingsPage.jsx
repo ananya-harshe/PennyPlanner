@@ -7,7 +7,7 @@ import { API_URL, getAuthHeaders } from '@/api/client'
 
 export default function SettingsPage() {
     const navigate = useNavigate()
-    const { logout, user } = useAuth()
+    const { logout, user, refreshUser } = useAuth()
 
     const [dailyGoal, setDailyGoal] = useState('')
     const [nickname, setNickname] = useState('')
@@ -191,6 +191,25 @@ export default function SettingsPage() {
                     >
                         <LogOut size={20} />
                         Logout
+                    </button>
+
+                    <button
+                        onClick={async () => {
+                            try {
+                                const response = await fetch(`${API_URL}/users/demo/xp`, {
+                                    method: 'PUT',
+                                    headers: getAuthHeaders()
+                                })
+                                if (!response.ok) throw new Error('Failed to set XP')
+                                toast.success('XP set to 9999! 🚀')
+                                await refreshUser() // Update local state immediately
+                            } catch (e) {
+                                toast.error('Failed to set XP')
+                            }
+                        }}
+                        className="w-full p-4 bg-purple-100 hover:bg-purple-200 text-purple-600 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 border-2 border-transparent hover:border-purple-300"
+                    >
+                        ⚡ Set XP to 9999 (Demo)
                     </button>
 
                     <button

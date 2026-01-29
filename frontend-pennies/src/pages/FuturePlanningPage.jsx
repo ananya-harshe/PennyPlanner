@@ -108,7 +108,9 @@ export default function FuturePlanningPage() {
                 <div className="flex justify-between items-end mb-6">
                     <div>
                         <h2 className="text-2xl font-black text-gray-800">Wealth Projection</h2>
-                        <p className="text-gray-500">Comparing different strategies over 5 years.</p>
+                        <p className="text-gray-500">
+                            Based on saving <span className="font-black text-emerald-600">${data?.monthly_contribution?.toFixed(2)}/month</span> for the next 5 years
+                        </p>
                     </div>
                 </div>
 

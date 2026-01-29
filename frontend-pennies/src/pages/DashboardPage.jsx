@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, PieChart as PieChartIcon, CreditCard, Wallet, Loader2, AlertCircle, Target, Plus, PiggyBank } from 'lucide-react'
+import { TrendingUp, TrendingDown, PieChart as PieChartIcon, CreditCard, Wallet, Loader2, AlertCircle, Target, Plus, PiggyBank, Trash2 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts'
 import { toast } from 'sonner'
 import axios from 'axios'
@@ -13,12 +13,15 @@ import Penny from '@/assets/Penny.png'
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
 
 export default function DashboardPage() {
-  const { dashboardData, setDashboardData, goalsData, setGoalsData } = useAuth()
+  const { user, dashboardData, setDashboardData, goalsData, setGoalsData } = useAuth()
   const [data, setData] = useState(null)
+  const [recentTransactions, setRecentTransactions] = useState([])
   const [showAddGoal, setShowAddGoal] = useState(false)
   const [pennyMessage, setPennyMessage] = useState(null)
   const [pennyAdvice, setPennyAdvice] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [selectedGoal, setSelectedGoal] = useState(null)
+  const [addMoneyAmount, setAddMoneyAmount] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,7 +32,6 @@ export default function DashboardPage() {
         setPennyMessage(dashboardData.message)
         setPennyAdvice(dashboardData.advice)
         setLoading(false)
-        return
       }
 
       try {
@@ -65,6 +67,37 @@ export default function DashboardPage() {
 
         setGoalsData(goalsList.data)
 
+        // Fetch recent transactions from backend (which has Nessie key)
+        if (user?.accountID) {
+          try {
+            console.log('📍 Fetching transactions for accountID:', user.accountID);
+            console.log('🔗 Calling endpoint: ', `${API_URL}/transactions/nessie/${user.accountID}`);
+            const purchasesResponse = await fetch(
+              `${API_URL}/transactions/nessie/${user.accountID}`,
+              { headers: getAuthHeaders() }
+            );
+
+            console.log('📊 Response status:', purchasesResponse.status);
+            const responseData = await purchasesResponse.json();
+            console.log('📊 Response data:', responseData);
+
+            if (purchasesResponse.ok) {
+              const purchases = Array.isArray(responseData) ? responseData : responseData.data || [];
+              console.log('✅ Processed purchases:', purchases);
+              console.log('✅ Number of transactions:', purchases.length);
+              setRecentTransactions(purchases);
+            } else {
+              console.warn('⚠️ Could not fetch purchases from Nessie:', purchasesResponse.status, responseData);
+              setRecentTransactions([]);
+            }
+          } catch (err) {
+            console.error('Error fetching Nessie transactions:', err);
+            setRecentTransactions([]);
+          }
+        } else {
+          console.warn('⚠️ No accountID found for user:', user);
+        }
+
       } catch (e) {
         console.error("Failed to fetch dashboard data", e)
         toast.error("Failed to load dashboard")
@@ -75,10 +108,67 @@ export default function DashboardPage() {
     }
 
     fetchData()
-  }, []) // Keep empty dependency array to run only on mount/unmount logic, accessing context current value via closure if needed? 
-  // Actually, if I don't include dashboardData in deps, and it WAS populated but component remounted, it works.
-  // If it wasn't populated, we fetch and populate.
-  // The only risk is if dashboardData changes externally while component is mounted, but that shouldn't happen except on logout.
+  }, [user?.accountID])
+
+  const handleAddMoneyToGoal = async (goalId) => {
+    if (!addMoneyAmount || parseFloat(addMoneyAmount) <= 0) {
+      toast.error('Please enter a valid amount')
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/goals/${goalId}/add-money`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify({ amount: parseFloat(addMoneyAmount) })
+      })
+
+      if (response.ok) {
+        toast.success(`Added $${addMoneyAmount} to your goal! 🎉`)
+        setAddMoneyAmount('')
+        setSelectedGoal(null)
+
+        // Refresh goals
+        const goalsResponse = await fetch(`${API_URL}/goals`, { headers: getAuthHeaders() })
+        const goalsData = await goalsResponse.json()
+        setGoalsData(goalsData.data)
+      } else {
+        const error = await response.json()
+        toast.error(error.message || 'Failed to add money to goal')
+      }
+    } catch (err) {
+      console.error('Error adding money to goal:', err)
+      toast.error('Failed to add money to goal')
+    }
+  }
+
+  const handleDeleteGoal = async (goalId) => {
+    if (!window.confirm('Are you sure you want to delete this goal?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/goals/${goalId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      })
+
+      if (response.ok) {
+        toast.success('Goal deleted successfully! 🗑️')
+        // Refresh goals
+        const goalsResponse = await fetch(`${API_URL}/goals`, { headers: getAuthHeaders() })
+        const goalsData = await goalsResponse.json()
+        setGoalsData(goalsData.data)
+      } else {
+        toast.error('Failed to delete goal')
+      }
+    } catch (e) {
+      toast.error('Failed to delete goal')
+    }
+  }
 
   if (loading) {
     return (
@@ -134,6 +224,21 @@ export default function DashboardPage() {
                   <span className="text-sm font-black text-indigo-500">{Math.round((goal.current_amount / goal.target_amount) * 100)}%</span>
                 </div>
                 <Progress value={(goal.current_amount / goal.target_amount) * 100} className="h-3" />
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => setSelectedGoal(goal._id)}
+                    className="flex-1 bg-indigo-100 text-indigo-600 font-bold py-2 rounded-xl hover:bg-indigo-200 transition-colors text-sm"
+                  >
+                    + Add Money
+                  </button>
+                  <button
+                    onClick={() => handleDeleteGoal(goal._id)}
+                    className="bg-red-50 text-red-500 p-2 rounded-xl hover:bg-red-100 transition-colors"
+                    title="Delete Goal"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -152,6 +257,45 @@ export default function DashboardPage() {
 
       {showAddGoal && <AddGoalModal onClose={() => setShowAddGoal(false)} />}
 
+      {/* Add Money to Goal Modal */}
+      {selectedGoal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl">
+            <h2 className="text-2xl font-black text-gray-800 mb-4">Add Money to Goal</h2>
+            <p className="text-gray-600 text-sm mb-6">How much would you like to add?</p>
+
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-gray-700 mb-2">Amount</label>
+              <input
+                type="number"
+                value={addMoneyAmount}
+                onChange={(e) => setAddMoneyAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 text-lg font-bold"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setSelectedGoal(null)
+                  setAddMoneyAmount('')
+                }}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleAddMoneyToGoal(selectedGoal)}
+                className="flex-1 px-4 py-3 bg-indigo-500 text-white font-bold rounded-xl hover:bg-indigo-600 transition-colors"
+              >
+                Add Money
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="card-3d p-6 border-4 border-gray-200 mb-6">
         <h2 className="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
           <TrendingUp className="text-emerald-500" />
@@ -159,42 +303,54 @@ export default function DashboardPage() {
         </h2>
 
         <div className="h-64 w-full">
-          {data?.chartData?.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data.chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                  labelLine={false}
-                >
-                  {data.chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <RechartsTooltip
-                  formatter={(value, name, props) => {
-                    const total = data.chartData.reduce((a, b) => a + b.value, 0);
-                    const percent = ((value / total) * 100).toFixed(1);
-                    return [`$${value.toFixed(2)} (${percent}%)`, name];
-                  }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                />
-                <Legend
-                  formatter={(value, entry, index) => {
-                    const total = data.chartData.reduce((a, b) => a + b.value, 0);
-                    const val = data.chartData[index]?.value || 0;
-                    const percent = ((val / total) * 100).toFixed(0);
-                    return <span className="text-sm font-bold ml-1">{percent}% {value}</span>
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
+          {recentTransactions && recentTransactions.length > 0 ? (() => {
+            // Calculate chart data once and reuse
+            const categoryMap = {};
+            recentTransactions.forEach(transaction => {
+              const category = transaction.description || 'Other';
+              categoryMap[category] = (categoryMap[category] || 0) + parseFloat(transaction.amount || 0);
+            });
+            const chartData = Object.entries(categoryMap).map(([name, value]) => ({
+              name,
+              value: parseFloat(value.toFixed(2))
+            }));
+            const total = chartData.reduce((a, b) => a + b.value, 0);
+
+            return (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    labelLine={false}
+                  >
+                    {chartData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip
+                    formatter={(value) => {
+                      const percent = ((value / total) * 100).toFixed(1);
+                      return [`$${value.toFixed(2)} (${percent}%)`, 'Amount'];
+                    }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                  />
+                  <Legend
+                    formatter={(value, entry) => {
+                      const val = entry?.payload?.value || 0;
+                      const percent = ((val / total) * 100).toFixed(1);
+                      return <span className="text-sm font-bold ml-1">{percent}% {value}</span>
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            );
+          })() : (
             <div className="h-full flex items-center justify-center text-gray-400 font-bold">
               No spending data yet!
             </div>
@@ -236,7 +392,11 @@ export default function DashboardPage() {
               <TrendingDown className="w-6 h-6 text-white" />
             </div>
           </div>
-          <p className="text-3xl font-black text-red-500">${data?.total?.toFixed(2) || '0.00'}</p>
+          <p className="text-3xl font-black text-red-500">
+            ${recentTransactions && recentTransactions.length > 0
+              ? recentTransactions.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0).toFixed(2)
+              : '0.00'}
+          </p>
           <p className="text-sm font-bold text-gray-600 mt-2">This month</p>
         </div>
       </div>
@@ -263,8 +423,6 @@ export default function DashboardPage() {
 
 
 
-
-
       {/* Recent Transactions */}
       <div className="card-3d p-8 border-4 border-gray-200">
         <div className="flex items-center gap-3 mb-6 justify-between">
@@ -277,25 +435,31 @@ export default function DashboardPage() {
           {/* View All removed */}
         </div>
         <div className="space-y-4">
-          {data?.recent?.slice(0, 5).map((transaction) => (
-            <div key={transaction._id} className="flex items-center justify-between py-3 border-b-2 border-gray-200 last:border-b-0">
-              <div className="text-left">
-                <p className="font-black text-gray-800 text-left">{transaction.description}</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-gray-500 uppercase">{transaction.category}</span>
-                  <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-500">{new Date(transaction.date).toLocaleDateString()}</span>
+          {recentTransactions && recentTransactions.length > 0 ? (
+            recentTransactions.slice(0, 5).map((transaction, index) => (
+              <div key={transaction._id || index} className="flex items-center justify-between py-3 border-b-2 border-gray-200 last:border-b-0">
+                <div className="text-left">
+                  <p className="font-black text-gray-800 text-left">{transaction.description || transaction.merchant_id}</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-gray-500 uppercase">{transaction.type || 'Purchase'}</span>
+                    <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded text-gray-500">
+                      {transaction.purchase_date ? new Date(transaction.purchase_date).toLocaleDateString() : 'N/A'}
+                    </span>
+                  </div>
                 </div>
+                <p
+                  className={`font-black text-right ${transaction.type === 'credit' ? 'text-emerald-500' : 'text-red-500'
+                    }`}
+                >
+                  {transaction.type === 'credit' ? '+' : '-'}${parseFloat(transaction.amount || 0).toFixed(2)}
+                </p>
               </div>
-              <span
-                className={`font-black ${transaction.type === 'income' ? 'text-emerald-500' : 'text-red-500'
-                  }`}
-              >
-                {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
-              </span>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-500 text-center py-4">No recent transactions from Nessie</p>
+          )}
         </div>
-      </div >
-    </div >
+      </div>
+    </div>
   )
 }

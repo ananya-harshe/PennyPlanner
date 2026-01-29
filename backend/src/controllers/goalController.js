@@ -111,4 +111,44 @@ export const getGoalInsights = async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, error: 'Server Error' });
     }
-}
+};
+
+// @desc    Add money to a goal
+// @route   PUT /api/goals/:id/add-money
+// @access  Private
+export const addMoneyToGoal = async (req, res) => {
+    try {
+        const { amount } = req.body;
+
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ success: false, message: 'Please provide a valid amount' });
+        }
+
+        let goal = await Goal.findById(req.params.id);
+
+        if (!goal) {
+            return res.status(404).json({ success: false, message: 'Goal not found' });
+        }
+
+        // Ensure user owns goal
+        if (goal.user_id.toString() !== req.user.id) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+
+        // Add money to goal
+        goal.current_amount = (goal.current_amount || 0) + parseFloat(amount);
+
+        // Check if goal is completed
+        if (goal.current_amount >= goal.target_amount) {
+            goal.completed = true;
+            goal.completed_at = new Date();
+        }
+
+        await goal.save();
+
+        res.status(200).json({ success: true, data: goal });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+};

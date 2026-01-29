@@ -1,5 +1,5 @@
 import express from 'express';
-import { getGoals, createGoal, updateGoal, deleteGoal, getGoalInsights } from '../controllers/goalController.js';
+import { getGoals, createGoal, updateGoal, deleteGoal, getGoalInsights, addMoneyToGoal } from '../controllers/goalController.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -12,6 +12,9 @@ router.route('/')
 
 router.route('/insights')
     .get(getGoalInsights);
+
+router.route('/:id/add-money')
+    .put(addMoneyToGoal);
 
 router.route('/:id')
     .put(updateGoal)

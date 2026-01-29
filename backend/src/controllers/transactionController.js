@@ -1,5 +1,6 @@
 import Transaction from '../models/Transaction.js';
 import { generateSpendingInsights } from '../services/geminiService.js';
+import axios from 'axios';
 
 export const createTransaction = async (req, res) => {
   try {
@@ -73,5 +74,30 @@ export const getSpendingAnalysis = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const getNessieTransactions = async (req, res) => {
+  try {
+    const { accountID } = req.params;
+
+    if (!accountID) {
+      return res.status(400).json({ message: 'accountID is required' });
+    }
+
+    console.log(`📍 Fetching Nessie transactions for account: ${accountID}`);
+
+    const nessieUrl = `http://api.nessieisreal.com/accounts/${accountID}/purchases?key=${process.env.NESSIE}`;
+    const response = await axios.get(nessieUrl);
+
+    console.log(`✅ Received ${response.data.length} purchases from Nessie`);
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('❌ Error fetching from Nessie:', error.message);
+    res.status(500).json({ 
+      message: 'Failed to fetch transactions from Nessie',
+      error: error.message 
+    });
   }
 };
